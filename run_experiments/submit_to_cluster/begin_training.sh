@@ -20,10 +20,12 @@ echo "CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}"
 echo "Number of CPU threads/core: $(nproc --all)"
 
 # Transfer ImageNet to scratch
+echo "Transfering data to cluster scratch..."
 tar -I pigz -xf /cluster/work/cvl/nipopovic/data/PASCAL_MT/pascal_mt.tar.gz -C ${TMPDIR}/
+echo "Transfered data to cluster scratch"
 
 # Set project paths
-PROJECT_ROOT_DIR=/cluster/project/cvl/nipopovic/code/composite_tasking
+PROJECT_ROOT_DIR=/cluster/project/cvl/nipopovic/code/composite-tasking
 export PYTHONPATH=${PYTHONPATH}:${PROJECT_ROOT_DIR}
 cd ${PROJECT_ROOT_DIR}
 pwd

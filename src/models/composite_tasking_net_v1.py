@@ -39,8 +39,7 @@ class CompositeTaskingNetV1(nn.Module):
     
     def _check_cfg(self):
         assert isinstance(self.cfg, dict)
-
-        assert isinstance(self.cfg["decoder_arch"], str)
+        
         assert isinstance(self.cfg["latent_w_dim"], int)
 
         assert self.cfg["which_cond"] in ["task_composition_v1"]

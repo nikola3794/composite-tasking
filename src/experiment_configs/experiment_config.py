@@ -258,17 +258,17 @@ class ExperimentConfig:
         else:
             return None
 
-        if self.cfg["training_cfg"]["pl_which_profiler"] == "simple":
+        if self.cfg["training_cfg"]["pl_which_profiler"].lower() == "simple":
             return SimpleProfiler(
                 output_filename=prof_out_file,
                 extended=True
             )
-        elif self.cfg["train_cfg"]["pl_which_profiler"] == "advanced":
+        elif self.cfg["train_cfg"]["pl_which_profiler"].lower() == "advanced":
             return AdvancedProfiler(
                 output_filename=prof_out_file,
                 line_count_restriction = 1.0
             )
-        elif self.cfg["train_cfg"]["pl_which_profiler"] in ["none", "None", ""]:
+        elif self.cfg["train_cfg"]["pl_which_profiler"].lower() in ["none", ""]:
             return None
         else:
             raise NotImplementedError 
@@ -299,7 +299,7 @@ class ExperimentConfig:
             return EarlyStopping(
                 patience=self.cfg["training_cfg"]["pl_early_stop_patience"], 
                 # Quantity to be monitored (must be logged with self.log)
-                monitor='val/losses/loss_total', 
+                monitor='val/loss/loss_total', 
                 mode='min',
                 # Minimum change in the monitored quantity to qualify as an improvement
                 min_delta = 0.0, 

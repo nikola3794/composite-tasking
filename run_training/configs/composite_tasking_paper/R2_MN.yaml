@@ -1,0 +1,139 @@
+# Setup config
+# ------------
+# Specify the name of the project
+# This name will be used to create a project in wandb 
+project_name: CompositeTasking
+# Specify the training pipeline
+which_system: composite_tasking
+
+# Data set & task palette config
+# ------------------------------
+# Specify to which size to scale images during training
+# Specify as a list [H, W]
+img_size:
+  - 256
+  - 256
+# Specifies the length of the task Z code indirectly
+# len(z_code) = task_code_len * 5 (hardcoded for PASCAL_MT for now)
+task_code_len: 20
+# Specify which task palette mode to use
+palette_mode: semantic_rule_R2
+# Specify a list of tasks to be used
+task_list:
+  - parts
+  - seg
+  - normals
+  - saliency 
+  - edges 
+  
+# Model config    
+# ------------
+# Specify the model
+which_model: multi_net_v1
+# Specify the architecture of the encoder
+encoder_arch: resnet34
+# Boolean which specifies whether to load ImageNet weights for the encoder
+encoder_pre_trained: true
+# TODO this is not used for now
+decoder_arch: None
+
+# Specify the number of FC layers in the task representation block
+n_fc_z_map: 6
+# Specify number of channels for the task palette embedding tensor
+latent_w_dim: 128
+
+# Specify the task composition block
+which_cond: task_composition_v1
+# Specify the conditioning block config
+#
+# {which_stats} specifies which standard normalization block to use 
+# to calculate feature map sttistics 
+#
+# {k} specifies the kernel size for the conv layer which produces 
+# the gamma and beta for the affine transformation conditioning
+cond_cfg_txt: cond_batch1x1
+
+# Kernel size of conv blocks in the skip connections
+skip_conv_ks: 1
+# Kernel size of conv blocks in the decoder
+dec_conv_ks: 3
+# Number of channels in the output
+# For now, only works with 3
+net_output_ch: 3
+
+# Training config    
+# ---------------
+# Specify the optimizer
+optimizer: adam
+# Specify the main learning rate
+lr: 0.001
+# Specify the lr of the encoder, by stating how much to divide the main lr
+lr_div_encoder: 100.0
+# Specify the lr scheduler
+lr_scheduler: reduce_on_plateau
+# Specify when to step, for 'step_lr', 
+lr_scheduler_step: 35
+# Specify the lr reduction factor for 'step_lr' or 'reduce_on_plateau'
+lr_scheduler_factor: 0.3
+# Specify how much to wait for the val loss to drop for 'reduce_on_plateau'
+lr_scheduler_patience: 12
+# Specify the gradient clipping value
+pl_grad_clip_val: 0.0
+# Specify weight decay
+wd: 0.00001
+# Specify the momentum for 'sgd' optimization
+sgd_momentum: 0.9
+# Specify whether to use Nesterov momentum for 'sgd' optimization
+sgd_nesterov_momentum: true
+
+# Specify the maximum number of epochs to train
+pl_max_epochs: 100
+# Specify the minimum number of epochs before the training stops
+pl_min_epochs: 100
+# Specify the early stopping patience
+pl_early_stop_patience: -1
+# Specify batch size
+b_size: 10
+# Specify number of data loading workers
+n_workers: 10
+
+# Specify the weights for loss components for different tasks
+seg_l_w: 3.0
+parts_l_w: 4.0
+edges_l_w: 50.0
+saliency_l_w: 8.0
+normals_l_w: 4.0
+
+# Specify the focal loss gamma for 'seg' and 'parts' loss
+seg_l_focal_gamma: 2.0
+
+# # Should speed up training when the input size doesnt change
+pl_benchmark: true
+# Specify whether to use full precision (32) or half precision (16)
+pl_precision: 32
+# Specify whether to enable synchronization between batchnorm layers across all GPUs
+pl_sync_batchnorm: true
+# Specify which type of time profiling from torch lightning to use
+# 'none', 'simple', 'advanced'
+pl_which_profiler: simple
+
+# Specify how often to refresh progress bar (in steps)
+pl_progress_bar_refresh_rate: 100
+# Specify how often to add logging rows (does not write to disk) (in steps)
+pl_log_every_n_steps: 100
+# Specify how often to write logs to disk (in steps)
+pl_flush_logs_every_n_steps: 100
+# Specify after how much epochs to run the validation procedure
+pl_check_val_every_n_epoch: 1
+# Specify which portion of the training data to use each epoch
+pl_limit_train_batches: 1.0
+# Specify which portion of the validation data to use each epoch
+pl_limit_val_batches: 1.0
+
+# Turn on/off debug mode
+# In debug mode, only a few epochs are conducted on a small portion of the data
+# Also, there is no local experiment logging directory, nor wanb logging
+debug: false
+# Specify a message explaining the experiment details
+# This is to leave notes why experiments were started
+message: This is a debugging configuration & experiment

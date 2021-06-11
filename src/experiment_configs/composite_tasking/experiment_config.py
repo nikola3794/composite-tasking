@@ -136,6 +136,15 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
                 colourmaps=self.data_sets["train"].get_colourmaps(), 
                 task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
             )
+        elif self.cfg["setup_cfg"]["which_system"] == "single_tasking":
+            # TODO
+            raise NotImplementedError
+            # return SingleTaskingSystemParallel(
+            #     cfg=self.cfg, 
+            #     task_to_id_dict=self.data_sets["train"].get_task_to_id_dict(), 
+            #     colourmaps=self.data_sets["train"].get_colourmaps(), 
+            #     task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
+            # )
         else:
             raise NotImplementedError
 

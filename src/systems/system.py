@@ -18,6 +18,7 @@ from ..metrics.seg_parts_metric import SegMetric
 from ..models.composite_tasking_net_v1 import CompositeTaskingNetV1
 from ..models.multi_head_net_v1 import MultiHeadNetV1
 from ..models.multi_net_v1 import MultiNetV1
+from ..models.single_net_v1 import SingleTaskingNetV1
 
 
 class System(pl.LightningModule):
@@ -180,6 +181,10 @@ class System(pl.LightningModule):
             model = MultiNetV1(
                 cfg=self.cfg["model_cfg"],
                 task_z_code_dict=new_task_z_code_dict
+            )
+        elif self.cfg["model_cfg"]["which_model"] == "single_tasking_net_v1":
+            model = SingleTaskingNetV1(
+                cfg=self.cfg["model_cfg"]
             )
         else:
             raise NotImplementedError
@@ -371,12 +376,12 @@ class System(pl.LightningModule):
                 elif isinstance(curr_metric[cur_met], float):
                     # Log main componenets
                     self.log(
-                        name=f"{which_split}/metric/{task}/{cur_met}/epoch", 
+                        name=f"{which_split}/metric/{task}_{cur_met}_epoch", 
                         value=curr_metric[cur_met],
                         prog_bar=False,
                         logger=True
                     )
-                    print(f"{which_split}/metric/{task}/{cur_met}/epoch metric:{curr_metric[cur_met]}")
+                    print(f"{which_split}/metric/{task}_{cur_met}_epoch:{curr_metric[cur_met]} ")
                 else:
                     raise NotImplementedError
                         

@@ -127,8 +127,8 @@ class PascalMT(torch.utils.data.Dataset):
             return self._getitem_task_palette(index)
         if self.cfg["palette_mode"] == "no_tasks":
             return self._getitem_just_img(index)
-        elif self.cfg["palette_mode"] == "all_labels":
-            return self._getitem_all_labels(index)
+        elif self.cfg["palette_mode"] == "all_tasks":
+            return self._getitem_all_tasks(index)
         else:
             raise NotImplementedError
 
@@ -153,7 +153,9 @@ class PascalMT(torch.utils.data.Dataset):
     def _getitem_regular(self, index, task_palette, unique_task_ids, seg_label=None, load_all_existing_labels=False):
         # Which labels to load and return
         if load_all_existing_labels:
-            task_ids_to_load = list(ID_TO_TASK.keys())
+            task_ids_to_load = []
+            for task in self.get_task_list():
+                task_ids_to_load.append(TASK_TO_ID[task])
         else:
             task_ids_to_load = unique_task_ids
 
@@ -223,7 +225,7 @@ class PascalMT(torch.utils.data.Dataset):
 
         return data_point 
 
-    def _getitem_all_labels(self, index):
+    def _getitem_all_tasks(self, index):
         # Return a datapoint with all labels loaded 
         # in a standard multi-task fashion
         return self._getitem_regular(
@@ -435,7 +437,7 @@ class PascalMT(torch.utils.data.Dataset):
         return label
 
     def get_task_list(self):
-        return self.task_palette_generator.get_task_list()
+        return self.cfg["task_palette_cfg"]["task_list"]
     
     def get_img_size(self):
         return self.cfg["img_size"]
@@ -473,7 +475,8 @@ class PascalMT(torch.utils.data.Dataset):
             elif task== 'saliency':
                 z[:4*c_len] = 0
                 z[4*c_len:5*c_len] = 1
-            task_z_code_dict[task] = z
+            if task in self.get_task_list():
+                task_z_code_dict[task] = z
         return torch.nn.ParameterDict(task_z_code_dict)
     
     # def get_task_codes(self, keys):

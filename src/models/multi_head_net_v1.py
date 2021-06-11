@@ -3,7 +3,6 @@ import torch.nn as nn
 
 from .blocks.encoder_v1 import EncoderV1
 from .blocks.decoder_v1 import DecoderV1
-from .blocks.task_representation_block_v1 import TaskRepresentationBlockV1
 
 
 class MultiHeadNetV1(nn.Module):
@@ -34,8 +33,6 @@ class MultiHeadNetV1(nn.Module):
 
     def _check_cfg(self):
         assert isinstance(self.cfg, dict)
-
-        assert isinstance(self.cfg["latent_w_dim"], int)
 
         assert self.cfg["which_cond"] in ["no_cond"]
 

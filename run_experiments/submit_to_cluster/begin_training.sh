@@ -8,7 +8,7 @@
 #BSUB -J "composite_tasking"
 
 # Activate python environment
-source /cluster/project/cvl/specta/python_envs/composite_tasking/bin/activate
+source /cluster/home/nipopovic/python_envs/composite_tasking/bin/activate
 
 # Access to internet to download torch models
 module load eth_proxy

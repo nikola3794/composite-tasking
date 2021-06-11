@@ -1,3 +1,15 @@
+# Defined by me
+# --------------------
+_OLD
+_old
+__pycache__
+.vscodes
+*/submit_to_cluster
+*.log
+
+# Automatically generated .gitingore
+# ----------------------------------
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

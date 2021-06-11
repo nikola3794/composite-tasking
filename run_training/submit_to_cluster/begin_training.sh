@@ -4,7 +4,7 @@
 #BSUB -n 8 # number of cpu cores
 #BSUB -R "rusage[mem=4096]" # MB per CPU core
 #BSUB -R "rusage[ngpus_excl_p=1]" # number of GPU cores
-#BSUB -R "select[gpu_mtotal0>=10240]" # MB per GPU core
+#BSUB -R "select[gpu_mtotal0>=20240]" # MB per GPU core
 #BSUB -J "CT_tr"
 
 # Activate python environment

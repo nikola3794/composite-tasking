@@ -99,7 +99,8 @@ def parse_args():
     parser.add_argument('--lr_div_encoder', default=100.0, type=float)    
     parser.add_argument('--lr_scheduler', default="step_lr", type=str_lower_case)
     parser.add_argument('--lr_scheduler_step', default=30, type=int)
-    parser.add_argument('--lr_scheduler_gamma', default=0.1, type=float)
+    parser.add_argument('--lr_scheduler_patience', default=12, type=float)
+    parser.add_argument('--lr_scheduler_factor', default=0.3, type=float)
     parser.add_argument('--pl_grad_clip_val', default=0.0, type=float)
     parser.add_argument('--wd', default=0.00001, type=float)
     parser.add_argument('--sgd_momentum', default=0.9, type=float)
@@ -234,7 +235,8 @@ def main():
         "lr_div_encoder": args.lr_div_encoder,
         "lr_scheduler": args.lr_scheduler,
         "lr_scheduler_step": args.lr_scheduler_step,
-        "lr_scheduler_gamma": args.lr_scheduler_gamma,
+        "lr_scheduler_patience": args.lr_scheduler_patience,
+        "lr_scheduler_factor": args.lr_scheduler_factor,
         "pl_grad_clip_val": args.pl_grad_clip_val,
         "wd": args.wd,
         "sgd_momentum": args.sgd_momentum,

@@ -42,9 +42,10 @@ net_output_ch: 3
 optimizer: adam
 lr: 0.001
 lr_div_encoder: 100.0
-lr_scheduler: step_lr
+lr_scheduler: reduce_on_plateau
 lr_scheduler_step: 35
-lr_scheduler_gamma: 0.3
+lr_scheduler_factor: 0.3
+lr_scheduler_patience: 12
 pl_grad_clip_val: 0.0
 wd: 0.00001
 sgd_momentum: 0.9

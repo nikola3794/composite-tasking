@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import math
 
 
-class L1Loss(nn.Module):
+class L1LossDiscardZero(nn.Module):
     """
     Computes the L1 loss.
     The target will have value 0 at spatial locations which should not be taken into consideration.

@@ -9,7 +9,7 @@ import torchmetrics
 from ..losses.balanced_bce import BalancedBCELoss
 from ..losses.cosine_similarity_loss import CosineSImilarityLoss
 from ..losses.focal_ce_grid_to_seg import FocalCEGridToSeg
-from ..losses.l1_loss import L1Loss
+from ..losses.l1_loss_discard_zero import L1LossDiscardZero
 
 from ..metrics.normals_metric import NormalsMetric
 from ..metrics.edges_sal_metric import EdgesSaliencyMetric
@@ -213,14 +213,14 @@ class System(pl.LightningModule):
         # TODO Implement ReduceLROnPlateau
         # TODO (this will complicate things a little bit since it needs access to the loss)
         # Which learning rate scheduler to use?
-        if self.training_cfg["lr_scheduler"] == "step_lr":
+        if self.training_cfg["lr_scheduler"].lower() == "step_lr":
             lr_scheduler = torch.optim.lr_scheduler.StepLR(
                 optimizer=optimizer, 
                 step_size=self.training_cfg["lr_scheduler_step"], 
-                gamma=self.training_cfg["lr_scheduler_gamma"], 
+                gamma=self.training_cfg["lr_scheduler_factor"], 
                 last_epoch=-1, 
             )
-        elif self.training_cfg["lr_scheduler"] == "cosine":
+        elif self.training_cfg["lr_scheduler"].lower() == "cosine":
             lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer=optimizer,
                 T_max=int(0.95*self.training_cfg["pl_max_epochs"]),
@@ -228,6 +228,18 @@ class System(pl.LightningModule):
                 last_epoch=-1,
                 verbose=False,
             )
+        elif self.training_cfg["lr_scheduler"].lower() == "reduce_on_plateau":
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer=optimizer, 
+                mode='min', 
+                factor=self.training_cfg["lr_scheduler_factor"], 
+                patience=self.training_cfg["lr_scheduler_patience"], 
+            )
+
+            lr_scheduler = {
+                "scheduler": scheduler,
+                "monitor": "val/loss/loss_total",
+            }
         else:
             raise NotImplementedError
 
@@ -328,8 +340,7 @@ class System(pl.LightningModule):
         # nn.ModuleDict so the right device is propagated, etc
         return nn.ModuleDict(metrics)
 
-    def _log_metrics_step_end(self, which_split):
-        # TODO 
+    def _log_metrics_step_end(self, which_split): 
         """
         Metric logging which happens at every step.
         For now, metrics are only calculated at the end of the epoch.

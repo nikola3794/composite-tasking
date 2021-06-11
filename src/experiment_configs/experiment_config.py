@@ -231,7 +231,9 @@ class ExperimentConfig:
 
             # Wandb logger
             wandb_name = f"{os.sep}".join(os.path.normpath(self.cfg["setup_cfg"]["exp_main_dir"]).split(os.sep)[-2:])
-            wandb_name = f"{self.cfg['setup_cfg']['which_system']}{os.sep}{wandb_name}"
+            wandb_name += f"{os.sep}S_{self.cfg['setup_cfg']['which_system']}"
+            wandb_name += f"{os.sep}TP_{self.cfg['data_set_cfg']['palette_mode']}"
+            wandb_name += f"{os.sep}M_{self.cfg['model_cfg']['which_model']}"
             wandb_logger = WandbLogger(
                 entity="nikola3794",
                 project=self.cfg["setup_cfg"]["project_name"],

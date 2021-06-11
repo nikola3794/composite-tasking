@@ -18,7 +18,7 @@ from ..metrics.seg_parts_metric import SegMetric
 from ..models.composite_tasking_net_v1 import CompositeTaskingNetV1
 from ..models.multi_head_net_v1 import MultiHeadNetV1
 from ..models.multi_net_v1 import MultiNetV1
-from ..models.single_net_v1 import SingleTaskingNetV1
+from ..models.single_tasking_net_v1 import SingleTaskingNetV1
 
 
 class System(pl.LightningModule):

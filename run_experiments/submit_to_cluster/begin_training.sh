@@ -33,6 +33,6 @@ pwd
 # call the training script
 python3 -u run_experiments/train.py \
 --config=${PROJECT_ROOT_DIR}/run_experiments/configs/debug_config_euler.yaml \
---data_root_dir=${TMPDIR}/ILSVRC2012 \
+--data_root_dir=${TMPDIR}/PASCAL_MT \
 --code_root_dir=${PROJECT_ROOT_DIR} \
 --exp_root_dir=/cluster/work/cvl/nipopovic/experiments/composite_tasking

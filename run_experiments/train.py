@@ -198,7 +198,7 @@ def main():
     # Data set & task palette config
     # ------------------------------
     data_set_cfg = {
-        "data_root": args.data_root,
+        "data_root": args.data_root_dir,
         "img_size": args.img_size,
         "palette_mode": args.palette_mode,
         "task_code_len": args.task_code_len,

@@ -4,7 +4,7 @@ _OLD
 _old
 __pycache__
 .vscodes
-*/submit_to_cluster
+#*/submit_to_cluster
 *.log
 
 # Automatically generated .gitingore

@@ -43,7 +43,7 @@ n_fc_z_map: 6
 latent_w_dim: 128
 
 # Specify the task composition block
-which_cond: task_composition_v1
+which_cond: no_cond
 # Specify the conditioning block config
 #
 # {which_stats} specifies which standard normalization block to use 

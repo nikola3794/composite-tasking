@@ -1,6 +1,7 @@
 import os
 import copy
 import json
+import shutil
 
 import torch
 
@@ -29,8 +30,8 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
             debug=debug)
         
         # Bookkeep informationr elated to task id's and codes
-        self.task_to_id_dict=self.data_sets["train"].get_task_to_id_dict(), 
-        self.colourmaps=self.data_sets["train"].get_colourmaps(), 
+        self.task_to_id_dict=self.data_sets["train"].get_task_to_id_dict()
+        self.colourmaps=self.data_sets["train"].get_colourmaps()
         self.task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
 
         # Save task_to_id_dict if there is an experiment folder
@@ -143,11 +144,26 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
         # Only save if an experiment directory exists
         if "exp_main_dir" in self.cfg["setup_cfg"]:
 
+            # Save the config yaml file if specified
+            save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "config_file.yaml")
+            if not os.path.isfile(save_path):
+                shutil.copyfile(
+                    src=self.cfg["setup_cfg"]["config_file_pth"],
+                    dst=save_path,
+                )
+                with open(save_path, "w") as fh:
+                    json.dump(self.task_to_id_dict, fh)
+
             #Save the task z code dictionary
             save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "task_z_code_dict.json")
             if not os.path.isfile(save_path):
+                # self.task_z_code_dict is a torch Parameter class
+                # convert back to regular dictionary for saving
+                task_z_codes_tmp = {}
+                for k in self.task_z_code_dict:
+                    task_z_codes_tmp[k] = self.task_z_code_dict[k].tolist()
                 with open(save_path, "w") as fh:
-                    json.dump(self.task_z_code_dict, fh)
+                    json.dump(task_z_codes_tmp, fh)
 
             # Save the ID to task name mapping
             save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "task_to_id_dict.json")
@@ -158,8 +174,13 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
             # Save the coulorumap mapping
             save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "colourmaps.json")
             if not os.path.isfile(save_path):
+                # self.colourmaps is a torch Parameter class
+                # convert back to regular dictionary for saving
+                colourmaps_tmp = {}
+                for k in self.colourmaps:
+                    colourmaps_tmp[k] = self.colourmaps[k].tolist()
                 with open(save_path, "w") as fh:
-                    json.dump(self.colourmaps, fh)
+                    json.dump(colourmaps_tmp, fh)
         
     # def _load_config_for_ongoing(self):
     #     with open(os.path.join(self.load_dir, f"exp_cfg.json"), "r") as fh:

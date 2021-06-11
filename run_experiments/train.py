@@ -55,8 +55,8 @@ def parse_args():
     # The first arg parser parses out only the --config argument, this argument is used to
     # load a yaml file containing key-values that override the defaults for the main parser below
     config_parser = parser = argparse.ArgumentParser(description='Training Config', add_help=False)
-    default_cfg_pth = '/home/nipopovic/Projects/composite_tasking/big_storage/code_shortcut/for_proj_acc/official_repo/run_experiments/configs/debug_config.yaml'
-    parser.add_argument('--config', default=default_cfg_pth, type=str, metavar='FILE',
+    default_cfg_pth = '/home/nipopovic/Projects/composite_tasking/big_storage/code_shortcut/composite-tasking/run_experiments/configs/debug_config.yaml'
+    parser.add_argument('--config_file_path', default=default_cfg_pth, type=str, metavar='FILE',
                         help='YAML config file specifying default arguments')
 
     # Create the argument parser for parsing the experiment config
@@ -143,9 +143,9 @@ def parse_args():
     # Parse the arguments
     # Do we have a config file to parse?
     args_config, remaining = config_parser.parse_known_args()
-    if args_config.config:
-        assert os.path.isfile(args_config.config)
-        with open(args_config.config, 'r') as f:
+    if args_config.config_file_path:
+        assert os.path.isfile(args_config.config_file_path)
+        with open(args_config.config_file_path, 'r') as f:
             cfg = yaml.safe_load(f)
             parser.set_defaults(**cfg)
 
@@ -157,11 +157,11 @@ def parse_args():
     
     args.message = args.message.replace("_", " ")
 
-    return args
+    return args, args_config.config_file_path
 
 def main():
     # Parse arguments
-    args = parse_args()
+    args, config_file_path = parse_args()
 
     # Make sure single-tasking regime has only 1 task specified
     if args.palette_mode == "single_task":
@@ -193,6 +193,7 @@ def main():
         "which_system": args.which_system,
         "exp_root_dir": args.exp_root_dir,
         "code_root_dir": args.code_root_dir,
+        "config_file_pth": config_file_path
     }
 
     # Data set & task palette config

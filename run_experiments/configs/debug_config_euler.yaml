@@ -53,8 +53,8 @@ sgd_nesterov_momentum: true
 pl_max_epochs: 100
 pl_min_epochs: 100
 pl_early_stop_patience: -1
-b_size: 2
-n_workers: 0
+b_size: 10
+n_workers: 10
 
 seg_l_w: 3.0
 parts_l_w: 4.0

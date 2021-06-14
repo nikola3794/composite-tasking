@@ -38,19 +38,18 @@ class SingleTaskingSystem(System):
         loss_total = torch.tensor(0.0, dtype=torch.float32, device=self.device)
         for task_id in considered_task_ids:
             # Forward pass
-            pred_logits_id, preds_id = self.forward(batch=batch, task_id=task_id)
-            pred_logits[task_id] = pred_logits_id
-            preds[task_id] = preds_id
+            pred_logits, preds = self.forward(batch=batch, task_id=task_id)
 
             # Compute losses
             loss_id = self._compute_loss(
-                pred_logits=pred_logits_id,
+                pred_logits=pred_logits,
                 preds=preds,
                 batch=batch,
                 task_id=task_id
             )
 
             # Accumulate total loss
+            # In this case the total loss is the selected task loss
             loss_total += loss_id
 
             # Total loss
@@ -129,14 +128,14 @@ class SingleTaskingSystem(System):
         for task_id in considered_task_ids:
             task = self.id_to_task_dict[task_id]
 
-            shape = list(pred_logits.values())[0].shape
+            shape = pred_logits.shape
             select_mask = task_id * torch.ones(shape, dtype=torch.uint8, device=self.device)
             select_mask = (select_mask == task_id)
 
             with torch.no_grad():            
                 # Call the metric for the current task
                 metric_args = {
-                    "pred": pred_logits[task_id] if task == "normals" else preds[task_id], 
+                    "pred": pred_logits if task == "normals" else preds, 
                     "target": batch["label"], 
                     "select_mask": select_mask,
                 }

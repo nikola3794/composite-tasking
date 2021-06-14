@@ -37,7 +37,7 @@ class NormalsMetric(Metric):
         mask = zero_norm_mask * select_mask
 
         # Reshape the mask to shape (-1,)
-        mask = torch.reshape(select_mask.all(dim=1), (-1,))
+        mask = torch.reshape(mask.all(dim=1), (-1,))
         
         # Reshape the tensor to shape (-1, D) and select according to mask
         pred_sel = torch.reshape(pred.permute(0, 2, 3, 1), (-1, pred.shape[1]))[mask, :]

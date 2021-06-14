@@ -47,7 +47,10 @@ class TaskPaletteGenSemanticMap(TaskPaletteGenAbstract):
         
         # Load the segmentation label to determin which other labels to load and where to put them
         seg_label_tesnor = transforms.ToTensor()(seg_label)
-        seg_target_label = label_to_classes(label=seg_label_tesnor.unsqueeze(0)*255.0, colourmap=self.cfg["colourmap_seg"]) # [0,1] --> [0,255]
+        seg_target_label = label_to_classes( # [0,1] --> [0,255]
+            label=seg_label_tesnor.unsqueeze(0)*255.0, 
+            cls_centroids=self.cfg["colourmap_seg"]
+        ) 
         curr_class_ids = torch.unique(seg_target_label).tolist()
 
         # List of task labels that need to be loaded

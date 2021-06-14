@@ -10,7 +10,7 @@ img_size:
   - 64
   - 64
 task_code_len: 20
-palette_mode: rnd_4_mosaic
+palette_mode: semantic_rule_R2
 task_list:
   - parts
   - seg

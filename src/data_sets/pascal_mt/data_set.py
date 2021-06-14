@@ -283,7 +283,7 @@ class PascalMT(torch.utils.data.Dataset):
             # the augmentation fucntion knows what to do with the label
             additional_augment_tasks[task] = "mask"
 
-            if task == "seg" and seg_label:
+            if task == "seg" and seg_label is not None:
                 # If the segmentation label was already loaded  (i.e. to construct the semantic rule),
                 # use it so that it is not loaded twice.
                 label = seg_label

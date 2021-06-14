@@ -1,7 +1,7 @@
 # Setup config
 # ------------
 project_name: CompositeTasking
-which_system: single_tasking
+which_system: composite_tasking
 which_cluster: eth
 
 # Data set & task palette config
@@ -10,17 +10,17 @@ img_size:
   - 64
   - 64
 task_code_len: 20
-palette_mode: single_task
+palette_mode: rnd_4_mosaic
 task_list:
-  #- parts
+  - parts
   - seg
-  #- normals
-  #- saliency 
-  #- edges 
+  - normals
+  - saliency 
+  - edges 
   
 # Model config    
 # ------------
-which_model: single_tasking_net_v1
+which_model: composite_tasking_net_v1
 
 encoder_arch: resnet18
 encoder_pre_trained: true
@@ -30,7 +30,7 @@ n_fc_z_map: 6
 latent_w_dim: 128
 
 #which_cond: task_composition_v1
-which_cond: no_cond
+which_cond: task_composition_v1
 cond_cfg_txt: cond_batch1x1
 
 skip_conv_ks: 1
@@ -71,5 +71,5 @@ pl_check_val_every_n_epoch: 1
 pl_limit_train_batches: 1.0
 pl_limit_val_batches: 1.0
 
-debug: false
+debug: true
 message: ...This is a debugging configuration & experiment...

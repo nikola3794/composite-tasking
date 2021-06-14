@@ -134,7 +134,7 @@ def parse_args():
     
     # Miscellaneous
     # -------------
-    parser.add_argument('--data_root_dir', default="/home/nipopovic/scratch_second/workspace/cvpr2021/DATA/PASCAL_MT", type=str)
+    parser.add_argument('--data_root_dir', default="/srv/beegfs02/scratch/composite_tasking/data/data_sets/PASCAL_MT", type=str)
     parser.add_argument('--code_root_dir', default="path", type=str)
     parser.add_argument('--exp_root_dir', default="/srv/beegfs02/scratch/switchtasks/data/NIKOLA/Experiments", type=str)
 

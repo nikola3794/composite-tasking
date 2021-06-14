@@ -72,7 +72,7 @@ class FocalCEGridToSeg(nn.Module):
         # This is a quick fix, in order not to destabilize things during backprop.
         if target_t.nelement() == 0:
             assert quasi_logits.nelement() == 0
-            return torch.tensor(0, dtype=torch.float32).to(pred.device).detach()
+            return torch.tensor(0.0, dtype=torch.float32).to(pred.device).detach()
 
         # Finally, calculate the loss
         if self.focal_gamma != 0:
@@ -81,7 +81,6 @@ class FocalCEGridToSeg(nn.Module):
             pt = pt.gather(1, target_t.unsqueeze(1).detach()).view(-1) + 1e-8 
             log_pt = pt.log()
             loss = -1 * torch.pow(torch.sub(1.0, pt), self.focal_gamma) * log_pt
-            loss = loss.mean()
         else:
             # Regular CE with torch implementation
             log_pt = nn.LogSoftmax(dim=-1)(quasi_logits)

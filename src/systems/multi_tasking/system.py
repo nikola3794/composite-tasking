@@ -81,7 +81,7 @@ class MultiTaskingSystem(System):
 
             # Call the loss function for the current task
             loss_args = {
-                "pred": pred_logits[task_id], 
+                "pred": preds[task_id] if task in ["seg", "parts"] else pred_logits[task_id], 
                 "target": batch["loaded_labels"][task], 
                 "select_mask": select_mask,
             }

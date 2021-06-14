@@ -79,7 +79,7 @@ class CompositeTaskingSystem(System):
             
             # Call the loss function for the current task
             loss_args = {
-                "pred": pred_logits, 
+                "pred": preds if task in ["seg", "parts"] else pred_logits, 
                 "target": batch["label"], 
                 "select_mask": select_mask,
             }

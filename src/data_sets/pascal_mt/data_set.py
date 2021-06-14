@@ -1,3 +1,6 @@
+# Data download link:
+# https://data.vision.ee.ethz.ch/nipopovic/PASCAL_MT.zip
+
 import os
 
 import time

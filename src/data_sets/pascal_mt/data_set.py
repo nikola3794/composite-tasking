@@ -402,6 +402,9 @@ class PascalMT(torch.utils.data.Dataset):
         label = cv2.imread(self.label_paths["saliency"][index]) 
         # Convert to RGB
         label = cv2.cvtColor(label, cv2.COLOR_BGR2RGB)
+
+        #label = (255 * (label > 0.5*255.0)).astype(np.uint8)
+
         # Resize the label
         label = cv2.resize(label, (self.cfg["img_size"][1], self.cfg["img_size"][0]), interpolation=cv2.INTER_NEAREST)
 

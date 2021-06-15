@@ -20,6 +20,8 @@ from ..models.multi_head_net_v1 import MultiHeadNetV1
 from ..models.multi_net_v1 import MultiNetV1
 from ..models.single_tasking_net_v1 import SingleTaskingNetV1
 
+from ..models.OLD.composit_tasking.model import CompositeTaskingNetV0
+
 
 class System(pl.LightningModule):
 
@@ -173,6 +175,27 @@ class System(pl.LightningModule):
         if self.cfg["model_cfg"]["which_model"] == "composite_tasking_net_v1":
             model = CompositeTaskingNetV1(
                 cfg=self.cfg["model_cfg"],
+                task_z_code_dict=new_task_z_code_dict
+            )
+        elif self.cfg["model_cfg"]["which_model"] == "composite_tasking_net_v0":
+            cfg = {
+                'backbone_arch': 'resnet34', 
+                'backbone_pre_trained': True, 
+                'which_cond': 'spatial_affine', 
+                'cond_cfg_txt': 'cond_batch1x1', 
+                'latent_w_dim': 128, 
+                'n_ch_before_output': 64, 
+                'net_output_ch': 3, 
+                'skip_conv_ks': 1, 
+                'dec_conv_ks': 3, 
+                'n_fc_z_map': 6, 
+                'latent_w_spat_interpolation': 
+                'bilinear_seq', 
+                'fc_z_w_custom_w_init': False, 
+                'spade_cond_fn': False
+            }
+            model = CompositeTaskingNetV0(
+                cfg=cfg,
                 task_z_code_dict=new_task_z_code_dict
             )
         elif self.cfg["model_cfg"]["which_model"] == "multi_head_net_v1":

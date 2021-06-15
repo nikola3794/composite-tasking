@@ -7,8 +7,8 @@ which_cluster: eth
 # Data set & task palette config
 # ------------------------------
 img_size:
-  - 64
-  - 64
+  - 32
+  - 32
 task_code_len: 20
 palette_mode: semantic_rule_R2
 task_list:
@@ -20,7 +20,7 @@ task_list:
   
 # Model config    
 # ------------
-which_model: composite_tasking_net_v1
+which_model: composite_tasking_net_v0
 
 encoder_arch: resnet18
 encoder_pre_trained: true

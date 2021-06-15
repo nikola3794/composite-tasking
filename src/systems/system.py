@@ -23,7 +23,8 @@ from ..models.single_tasking_net_v1 import SingleTaskingNetV1
 
 class System(pl.LightningModule):
 
-    def __init__(self, cfg, task_to_id_dict, colourmaps, task_z_code_dict):
+    def __init__(self, cfg, task_to_id_dict, colourmaps, task_z_code_dict, 
+                 used_seg_cls_ids=None, used_parts_cls_ids=None):
         super().__init__()
 
         # Store input arguments
@@ -32,6 +33,8 @@ class System(pl.LightningModule):
         self.task_to_id_dict = task_to_id_dict
         self.colourmaps = colourmaps
         self.task_z_code_dict = task_z_code_dict
+        self.used_seg_cls_ids = used_seg_cls_ids
+        self.used_parts_cls_ids = used_parts_cls_ids
 
         # Reverse task_to_id_dict to get id_to_task_dict
         id_to_task_dict = {}
@@ -336,8 +339,10 @@ class System(pl.LightningModule):
                     "cls_centroids": self.colourmaps[task],
                     "task": task,
                 }
-                if self.cfg["data_set_cfg"]["palette_mode"] in ["meaningful_labels_1", "meaningful_labels_3"]:
-                    metric_args["cls_ids_of_interest"] = self.data_set["val"].used_seg_cls_ids
+                if task == "seg" and self.used_seg_cls_ids:
+                    metric_args["cls_ids_of_interest"] = self.used_seg_cls_ids
+                if task == "parts" and self.used_parts_cls_ids:
+                    metric_args["cls_ids_of_interest"] = self.used_parts_cls_ids
                 metrics[task] = SegMetric(**metric_args)
             else:
                 raise NotImplementedError

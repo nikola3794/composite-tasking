@@ -113,38 +113,28 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
         )
     
     def _create_system(self):
+        system_args = {
+            "cfg": self.cfg,
+            "task_to_id_dict": self.data_sets["train"].get_task_to_id_dict(),
+            "colourmaps": self.data_sets["train"].get_colourmaps(), 
+            "task_z_code_dict": self.data_sets["train"].get_task_z_code_dict()
+        }
+        if self.cfg["data_set_cfg"]["palette_mode"] in ["semantic_rule_R2", "semantic_rule_R3"]:
+            system_args["used_seg_cls_ids"] = self.data_sets["val"].used_seg_cls_ids
+            system_args["used_parts_cls_ids"] = self.data_sets["val"].used_parts_cls_ids
+
         if self.cfg["setup_cfg"]["which_system"] == "composite_tasking":
-            return CompositeTaskingSystem(
-                cfg=self.cfg, 
-                task_to_id_dict=self.data_sets["train"].get_task_to_id_dict(), 
-                colourmaps=self.data_sets["train"].get_colourmaps(), 
-                task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
-            )
+            return CompositeTaskingSystem(**system_args)
         elif self.cfg["setup_cfg"]["which_system"] == "multi_tasking":
-            return MultiTaskingSystem(
-                cfg=self.cfg, 
-                task_to_id_dict=self.data_sets["train"].get_task_to_id_dict(), 
-                colourmaps=self.data_sets["train"].get_colourmaps(), 
-                task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
-            )
+            return MultiTaskingSystem(**system_args)
         elif self.cfg["setup_cfg"]["which_system"] == "single_tasking":
             # Check that a single task data-set has been defined
             assert len(self.cfg["data_set_cfg"]["task_list"]) == 1
-            return SingleTaskingSystem(
-                cfg=self.cfg, 
-                task_to_id_dict=self.data_sets["train"].get_task_to_id_dict(), 
-                colourmaps=self.data_sets["train"].get_colourmaps(), 
-                task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
-            )
+            return SingleTaskingSystem(**system_args)
         elif self.cfg["setup_cfg"]["which_system"] == "single_tasking":
             # TODO
             raise NotImplementedError
-            # return SingleTaskingSystemParallel(
-            #     cfg=self.cfg, 
-            #     task_to_id_dict=self.data_sets["train"].get_task_to_id_dict(), 
-            #     colourmaps=self.data_sets["train"].get_colourmaps(), 
-            #     task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
-            # )
+            # return SingleTaskingSystemParallel(**system_args)
         else:
             raise NotImplementedError
 

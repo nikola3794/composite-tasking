@@ -7,13 +7,15 @@ from ..system import System
 
 
 class CompositeTaskingSystem(System):
-
-    def __init__(self, cfg, task_to_id_dict, colourmaps, task_z_code_dict):
+    def __init__(self, cfg, task_to_id_dict, colourmaps, task_z_code_dict, 
+                 used_seg_cls_ids=None, used_parts_cls_ids=None):
         super().__init__(
             cfg=cfg, 
             task_to_id_dict=task_to_id_dict,
             colourmaps=colourmaps,
-            task_z_code_dict=task_z_code_dict
+            task_z_code_dict=task_z_code_dict,
+            used_seg_cls_ids=used_seg_cls_ids,
+            used_parts_cls_ids=used_parts_cls_ids,
         )
 
     def _one_step(self, batch, batch_idx, which_split):

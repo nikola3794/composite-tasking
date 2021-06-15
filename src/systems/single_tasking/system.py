@@ -7,12 +7,17 @@ from ..system import System
 
 
 class SingleTaskingSystem(System):
-    def __init__(self, cfg, task_to_id_dict, colourmaps, task_z_code_dict):
+    def __init__(self, cfg, task_to_id_dict, colourmaps, task_z_code_dict, 
+                 used_seg_cls_ids=None, used_parts_cls_ids=None):
+        assert used_seg_cls_ids is None
+        assert used_parts_cls_ids is None
         super().__init__(
             cfg=cfg, 
             task_to_id_dict=task_to_id_dict,
             colourmaps=colourmaps,
-            task_z_code_dict=task_z_code_dict
+            task_z_code_dict=task_z_code_dict,
+            used_seg_cls_ids=used_seg_cls_ids,
+            used_parts_cls_ids=used_parts_cls_ids,
         )
 
         # This system will have a manually implemented backrpop

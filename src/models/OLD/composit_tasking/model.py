@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torchvision
 import numpy as np
-from torchsummary import summary
 from torch.nn import init
 from torch.nn import functional as F
 from torch.autograd import Function

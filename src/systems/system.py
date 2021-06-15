@@ -390,8 +390,16 @@ class System(pl.LightningModule):
                 else:
                     raise NotImplementedError
                         
-            # Plot all different used learning rates for this epoch
+            
             if which_split == "train":
+                # Log the current learning rate
+                self.log(
+                    name=f"misc/epoch", 
+                    value=self.current_epoch,
+                    prog_bar=False,
+                    logger=True
+                )
+                # Log all different used learning rates for this epoch
                 plotted_lr = []
                 for j, param_group in enumerate(self.optimizers().param_groups):
                     if param_group['lr'] not in plotted_lr:
@@ -403,6 +411,7 @@ class System(pl.LightningModule):
                             prog_bar=False,
                             logger=True
                         )
+                
         print(f"\n\n")
 
     def _closure(self, batch):

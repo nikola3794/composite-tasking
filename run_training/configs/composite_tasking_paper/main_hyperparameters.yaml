@@ -34,6 +34,7 @@ task_list:
 # Model config    
 # ------------
 # Specify the model
+# 'composite_tasking_net_v0', 'multi_head_net_v0', 'multi_net_v0'
 # 'composite_tasking_net_v1', 'multi_head_net_v1', 'multi_net_v1', 'single_tasking_net_v1'
 which_model: composite_tasking_net_v1 #SPECIFY<------------------
 # Specify the architecture of the encoder
@@ -50,7 +51,8 @@ n_fc_z_map: 6
 latent_w_dim: 128
 
 # Specify the task composition block
-# 'task_composition_v1', 'no_cond'
+# 'task_composition_v0', 'no_cond',
+# 'task_composition_v1'
 # 'no_cond' must be used for non-composite architectures
 which_cond: task_composition_v1
 # Specify the conditioning block config
@@ -82,7 +84,8 @@ lr: 0.001
 # Specify the lr of the encoder, by stating how much to divide the main lr
 lr_div_encoder: 100.0
 # Specify the lr scheduler
-# 'step_lr', 'cosine', 'reduce_on_plateau'
+# 'step_lr', 'cosine', 'reduce_on_plateau',
+# 'multi_step_1', 
 lr_scheduler: reduce_on_plateau
 # Specify when to step, for 'step_lr', 
 lr_scheduler_step: 35

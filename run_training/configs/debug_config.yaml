@@ -30,7 +30,7 @@ n_fc_z_map: 6
 latent_w_dim: 128
 
 #which_cond: task_composition_v1
-which_cond: task_composition_v1
+which_cond: task_composition_v0
 cond_cfg_txt: cond_batch1x1
 
 skip_conv_ks: 1

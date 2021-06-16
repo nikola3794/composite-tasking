@@ -20,8 +20,8 @@ task_code_len: 20
 palette_mode: rnd_all_mosaic
 # Specify a list of tasks to be used
 task_list:
-  - parts
   - seg
+  - parts
   - normals
   - saliency 
   - edges 
@@ -29,7 +29,7 @@ task_list:
 # Model config    
 # ------------
 # Specify the model
-which_model: composite_tasking_net_v1
+which_model: composite_tasking_net_v0
 # Specify the architecture of the encoder
 encoder_arch: resnet34
 # Boolean which specifies whether to load ImageNet weights for the encoder
@@ -43,7 +43,7 @@ n_fc_z_map: 6
 latent_w_dim: 128
 
 # Specify the task composition block
-which_cond: task_composition_v1
+which_cond: task_composition_v0
 # Specify the conditioning block config
 #
 # {which_stats} specifies which standard normalization block to use 
@@ -70,7 +70,7 @@ lr: 0.001
 # Specify the lr of the encoder, by stating how much to divide the main lr
 lr_div_encoder: 100.0
 # Specify the lr scheduler
-lr_scheduler: reduce_on_plateau
+lr_scheduler: multi_step_1
 # Specify when to step, for 'step_lr', 
 lr_scheduler_step: 35
 # Specify the lr reduction factor for 'step_lr' or 'reduce_on_plateau'

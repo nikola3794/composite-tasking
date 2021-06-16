@@ -20,7 +20,9 @@ from ..models.multi_head_net_v1 import MultiHeadNetV1
 from ..models.multi_net_v1 import MultiNetV1
 from ..models.single_tasking_net_v1 import SingleTaskingNetV1
 
-from ..models.OLD.composit_tasking.model import CompositeTaskingNetV0
+from ..models.original_implementation.composit_tasking_net.model import CompositeTaskingNetV0
+from ..models.original_implementation.multi_head_net.model import MultiHeadNetV0
+from ..models.original_implementation.multi_net.model import MultiNetV0
 
 
 class System(pl.LightningModule):
@@ -172,34 +174,28 @@ class System(pl.LightningModule):
             new_task_z_code_dict[new_k] = task_z_code_dict[k]  
 
         # Create the specified model
-        if self.cfg["model_cfg"]["which_model"] == "composite_tasking_net_v1":
+        if self.cfg["model_cfg"]["which_model"] == "composite_tasking_net_v0":
+            model = CompositeTaskingNetV0(
+                cfg=self.cfg["model_cfg"],
+                task_z_code_dict=new_task_z_code_dict
+            )
+        elif self.cfg["model_cfg"]["which_model"] == "composite_tasking_net_v1":
             model = CompositeTaskingNetV1(
                 cfg=self.cfg["model_cfg"],
                 task_z_code_dict=new_task_z_code_dict
             )
-        elif self.cfg["model_cfg"]["which_model"] == "composite_tasking_net_v0":
-            cfg = {
-                'backbone_arch': 'resnet34', 
-                'backbone_pre_trained': True, 
-                'which_cond': 'spatial_affine', 
-                'cond_cfg_txt': 'cond_batch1x1', 
-                'latent_w_dim': 128, 
-                'n_ch_before_output': 64, 
-                'net_output_ch': 3, 
-                'skip_conv_ks': 1, 
-                'dec_conv_ks': 3, 
-                'n_fc_z_map': 6, 
-                'latent_w_spat_interpolation': 
-                'bilinear_seq', 
-                'fc_z_w_custom_w_init': False, 
-                'spade_cond_fn': False
-            }
-            model = CompositeTaskingNetV0(
-                cfg=cfg,
+        elif self.cfg["model_cfg"]["which_model"] == "multi_head_net_v0":
+            model = MultiHeadNetV0(
+                cfg=self.cfg["model_cfg"],
                 task_z_code_dict=new_task_z_code_dict
             )
         elif self.cfg["model_cfg"]["which_model"] == "multi_head_net_v1":
             model = MultiHeadNetV1(
+                cfg=self.cfg["model_cfg"],
+                task_z_code_dict=new_task_z_code_dict
+            )
+        elif self.cfg["model_cfg"]["which_model"] == "multi_net_v0":
+            model = MultiNetV0(
                 cfg=self.cfg["model_cfg"],
                 task_z_code_dict=new_task_z_code_dict
             )
@@ -253,7 +249,6 @@ class System(pl.LightningModule):
             )
         elif self.training_cfg["lr_scheduler"].lower() == "cosine":
             lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer=optimizer,
                 T_max=int(0.95*self.training_cfg["pl_max_epochs"]),
                 eta_min=self.training_cfg["lr"]/1000.0,
                 last_epoch=-1,
@@ -271,6 +266,12 @@ class System(pl.LightningModule):
                 "scheduler": scheduler,
                 "monitor": "val/loss/loss_total",
             }
+        elif self.training_cfg["lr_scheduler"].lower() == "multi_step_1":
+            scheduler = torch.optim.lr_scheduler.MultiStepLR(
+                optimizer=optimizer, 
+                milestones=[60, 80, 94], 
+                gamma=self.training_cfg["lr_scheduler_factor"]
+            )
         else:
             raise NotImplementedError
 

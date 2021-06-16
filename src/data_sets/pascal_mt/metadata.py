@@ -3,11 +3,11 @@ DATA_SPLIT_PATH = "ImageSets/Context"
 
 IMG_PATH = "JPEGImages"
 COLOURMAPS_PATH = "colourmaps"
-SEG_PATH = "semseg/pascal-context"
-PARTS_PATH = "human_superpartssymmetry"
+SEG_PATH = "semantic_segmentation"
+PARTS_PATH = "human_parts"
 EDGES_PATH = "pascal-context/trainval"
-NORMALS_PATH = "normals_distill"
-SALIENCY_PATH = "sal_distill"
+NORMALS_PATH = "normals_distilled"
+SALIENCY_PATH = "saliency_distilled"
 
 # Define a numerical relation between the name of a task and its code number
 # It is important for code to work properly that the IDs go 0,....,N_tasks-1

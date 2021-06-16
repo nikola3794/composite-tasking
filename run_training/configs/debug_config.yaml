@@ -23,7 +23,7 @@ task_list:
   
 # Model config    
 # ------------
-which_model: composite_tasking_net_v0
+which_model: multi_net_v0
 
 encoder_arch: resnet18
 encoder_pre_trained: true

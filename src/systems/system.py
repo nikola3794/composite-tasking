@@ -267,7 +267,7 @@ class System(pl.LightningModule):
                 "monitor": "val/loss/loss_total",
             }
         elif self.training_cfg["lr_scheduler"].lower() == "multi_step_1":
-            scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
                 optimizer=optimizer, 
                 milestones=[60, 80, 94], 
                 gamma=self.training_cfg["lr_scheduler_factor"]

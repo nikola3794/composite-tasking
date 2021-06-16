@@ -152,14 +152,38 @@ class System(pl.LightningModule):
         # Log and reset metrics
         self._log_and_reset_metrics_epoch(outs=outs, which_split="val")
 
-    # TODO No test split yet
-    # TODO Implement this as a call to the validation steps?
-    # def test_step(self, batch, batch_idx):
-    #     pass
-    # def test_step_end(self):
-    #     pass
-    # def test_epoch_end(self, outs):
-    #     pass
+    def test_step(self, batch, batch_idx):
+        # Execute one batch step
+        return self._one_step(
+            batch=batch, 
+            batch_idx=batch_idx, 
+            which_split="test"
+        )
+
+    def test_step_end(self, out):
+        # Log losses
+        self._log_losses_step_end(
+            loss_dict=out["loss_dict"], 
+            which_split="test",
+        )
+
+        # Update metrics
+        self._update_metrics_step_end(
+            pred_logits=out["pred_logits"],
+            preds=out["preds"],
+            batch=out["batch"]
+        )
+
+        # Log metrics
+        self._log_metrics_step_end(
+            which_split="test",
+        )
+        
+        return out["loss_dict"]["loss_total"]
+
+    def test_epoch_end(self, outs):
+        # Log and reset metrics
+        self._log_and_reset_metrics_epoch(outs=outs, which_split="test")
 
     def _create_model(self):
         """
@@ -410,7 +434,7 @@ class System(pl.LightningModule):
                         prog_bar=False,
                         logger=True
                     )
-                    print(f"{which_split}/metric/{task}_{cur_met}_epoch:{curr_metric[cur_met]} ")
+                    print(f"{which_split}/metric/{task}_{cur_met}_epoch:{curr_metric[cur_met]:.4f} ")
                 else:
                     raise NotImplementedError
                         

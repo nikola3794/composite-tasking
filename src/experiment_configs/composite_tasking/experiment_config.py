@@ -18,18 +18,17 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
 
     def __init__(self):
         pass
-    
-    # TODO Implement experiment loading
 
     def init_new_exp(self, cfg, augmentation, input_transform, debug=False):
         # Initialize the general experiment class
-        self._init_new_exp_generic(
+        self._init_new_exp(
             cfg=cfg, 
             augmentation=augmentation, 
             input_transform=input_transform, 
-            debug=debug)
+            debug=debug
+        )
         
-        # Bookkeep informationr elated to task id's and codes
+        # Bookkeep informationr related to task id's and task codes
         self.task_to_id_dict=self.data_sets["train"].get_task_to_id_dict()
         self.colourmaps=self.data_sets["train"].get_colourmaps()
         self.task_z_code_dict=self.data_sets["train"].get_task_z_code_dict()
@@ -37,10 +36,66 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
         # Save task_to_id_dict if there is an experiment folder
         self._save_task_info_to_json()
 
+    def load_existing_exp(self, checkpoint_path, load_trainer_ckp, cfg_overwrite, augmentation, input_transform, debug=False):
+        # Initialize the general experiment class
+        self._load_existing_exp(
+            checkpoint_path=checkpoint_path,
+            load_trainer_ckp=load_trainer_ckp,
+            cfg_overwrite=cfg_overwrite, 
+            augmentation=augmentation, 
+            input_transform=input_transform, 
+            debug=debug
+        )
+    
+    def _load_system(self, checkpoint_path):
+        # Load informationr related to task id's and task codes
+        self.task_z_code_dict, self.task_to_id_dict, self.colourmaps = self._load_task_info_from_json()
+
+        # Get the appropriate system
+        system, _ = self._get_system_constructor()
+        # Load the system from a checkpoint
+        system = system.load_from_checkpoint(
+            checkpoint_path,
+            task_z_code_dict = self.task_z_code_dict,
+            task_to_id_dict = self.task_to_id_dict,
+            colourmaps = self.colourmaps,
+            used_seg_cls_ids=self.data_sets["train"].used_seg_cls_ids,
+            used_parts_cls_ids=self.data_sets["train"].used_parts_cls_ids,
+        )
+        
+        # TODO <--------------------------------
+        # The system will automatically load all __init__ arguments from the checpoints saved with save_hyperparameters()
+        # Since these contain some parameters  that do not necessarily describe the model
+        # (like data_set parameters), forecefully overwrite them with the provided ones.
+        # TODO <--------------------------------
+        # TODO Is this necessary?
+        system_cfg_tmp = self.cfg.copy()
+        system_cfg_tmp["model_cfg"] = system.cfg["model_cfg"].copy()
+        system.cfg = system_cfg_tmp
+
+        # TODO <--------------------------------
+        # When constructing the system only the cfg dictinonary is saved as a torch lightning
+        # hyperparameter. When loading the system, other arguments need to be passed, and torch lightning
+        # automatically considers them as hyperparameters and fails later because of that.
+        # Here I have hardcoded to remove all unwanted arguments from the hyperparameter dictionary
+        # TODO <--------------------------------
+        keys = ["task_to_id_dict", "colourmaps", "task_z_code_dict", 
+                 "used_seg_cls_ids", "used_parts_cls_ids"]
+        for k in keys:
+            if k in system._hparams_initial:
+                del system._hparams_initial[k]
+            if k in system._hparams:
+                del system._hparams[k]
+
+        return system
+
     def _create_data_sets(self):
         data_sets = {}
         for which in ["train", "val"]:
             data_sets[which] = self.create_data_set(which_split=which)
+        # PASCAL_MT only has a train and validation split, 
+        # so the validation split is used as a test split
+        data_sets["test"] = self.create_data_set(which_split="val")
         return data_sets
 
     def create_data_set(self, which_split):
@@ -104,47 +159,39 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
         
         return data_loader
 
-    def evaluate(self):
-        self.trainer.test(
-            model=self.system,
-            ckpt_path=None, # None for last, 'best' for best, or providde a path
-            test_dataloaders=self.data_loaders["train"],
-            verbose=True
-        )
-    
-    def _create_system(self):
-        system_args = {
+    def _get_system_constructor(self):
+        system_arg_dict = {
             "cfg": self.cfg,
             "task_to_id_dict": self.data_sets["train"].get_task_to_id_dict(),
             "colourmaps": self.data_sets["train"].get_colourmaps(), 
             "task_z_code_dict": self.data_sets["train"].get_task_z_code_dict()
         }
         if self.cfg["data_set_cfg"]["palette_mode"] in ["semantic_rule_R2", "semantic_rule_R3"]:
-            system_args["used_seg_cls_ids"] = self.data_sets["val"].used_seg_cls_ids
-            system_args["used_parts_cls_ids"] = self.data_sets["val"].used_parts_cls_ids
+            system_arg_dict["used_seg_cls_ids"] = self.data_sets["val"].used_seg_cls_ids
+            system_arg_dict["used_parts_cls_ids"] = self.data_sets["val"].used_parts_cls_ids
 
         if self.cfg["setup_cfg"]["which_system"] == "composite_tasking":
-            return CompositeTaskingSystem(**system_args)
+            return CompositeTaskingSystem, system_arg_dict
         elif self.cfg["setup_cfg"]["which_system"] == "multi_tasking":
-            return MultiTaskingSystem(**system_args)
+            return MultiTaskingSystem, system_arg_dict
         elif self.cfg["setup_cfg"]["which_system"] == "single_tasking":
             # Check that a single task data-set has been defined
             assert len(self.cfg["data_set_cfg"]["task_list"]) == 1
-            return SingleTaskingSystem(**system_args)
-        elif self.cfg["setup_cfg"]["which_system"] == "single_tasking":
+            return SingleTaskingSystem, system_arg_dict
+        elif self.cfg["setup_cfg"]["which_system"] == "single_tasking_parallel":
             # TODO
             raise NotImplementedError
-            # return SingleTaskingSystemParallel(**system_args)
+            # return SingleTaskingSystemParallel, system_arg_dict
         else:
             raise NotImplementedError
 
     def _save_task_info_to_json(self):        
         # Save the task code dictionary
         # Only save if an experiment directory exists
-        if "exp_main_dir" in self.cfg["setup_cfg"]:
+        if self.exp_main_dir:
 
             # Save the config yaml file if specified
-            save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "config_file.yaml")
+            save_path = os.path.join(self.exp_main_dir, "config_file.yaml")
             if not os.path.isfile(save_path):
                 shutil.copyfile(
                     src=self.cfg["setup_cfg"]["config_file_pth"],
@@ -154,7 +201,7 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
                     json.dump(self.task_to_id_dict, fh)
 
             #Save the task z code dictionary
-            save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "task_z_code_dict.json")
+            save_path = os.path.join(self.exp_main_dir, "task_z_code_dict.json")
             if not os.path.isfile(save_path):
                 # self.task_z_code_dict is a torch Parameter class
                 # convert back to regular dictionary for saving
@@ -165,13 +212,13 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
                     json.dump(task_z_codes_tmp, fh)
 
             # Save the ID to task name mapping
-            save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "task_to_id_dict.json")
+            save_path = os.path.join(self.exp_main_dir, "task_to_id_dict.json")
             if not os.path.isfile(save_path):
                 with open(save_path, "w") as fh:
                     json.dump(self.task_to_id_dict, fh)
 
             # Save the coulorumap mapping
-            save_path = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "colourmaps.json")
+            save_path = os.path.join(self.exp_main_dir, "colourmaps.json")
             if not os.path.isfile(save_path):
                 # self.colourmaps is a torch Parameter class
                 # convert back to regular dictionary for saving
@@ -181,7 +228,35 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
                 with open(save_path, "w") as fh:
                     json.dump(colourmaps_tmp, fh)
         
-    # def _load_config_for_ongoing(self):
-    #     with open(os.path.join(self.load_dir, f"exp_cfg.json"), "r") as fh:
-    #         cfg = json.load(fh)
-    #     return cfg
+    def _load_task_info_from_json(self):
+
+        # Load the task z code dictionary
+        load_path = os.path.join(self.exp_main_dir, "task_z_code_dict.json")
+        assert os.path.isfile(load_path)
+        # self.task_z_code_dict is a torch Parameter class
+        # convert back to regular dictionary for saving
+        with open(load_path, "r") as fh:
+            task_z_code_dict = json.load(fh)
+        # Convert to torch.nn.ParameterDict where every entry is a torch.nn.parameter.Parameter
+        for k in task_z_code_dict:
+            task_z_code_dict[k] = torch.nn.parameter.Parameter(torch.tensor(task_z_code_dict[k], dtype=torch.float32), requires_grad=False)
+        task_z_code_dict = torch.nn.ParameterDict(task_z_code_dict)
+        
+        # Load the ID to task name mapping
+        load_path = os.path.join(self.exp_main_dir, "task_to_id_dict.json")
+        assert os.path.isfile(load_path)
+        with open(load_path, "r") as fh:
+            task_to_id_dict = json.load(fh)
+
+        # Load the coulorumap mapping
+        load_path = os.path.join(self.exp_main_dir, "colourmaps.json")
+        assert os.path.isfile(load_path)
+        with open(load_path, "r") as fh:
+            colourmaps = json.load(fh)
+
+        # Convert to torch.nn.ParameterDict where every entry is a torch.nn.parameter.Parameter
+        for k in colourmaps:
+            colourmaps[k] = torch.tensor(colourmaps[k], dtype=torch.float32, requires_grad=False)
+
+        return task_z_code_dict, task_to_id_dict, colourmaps
+

@@ -1,0 +1,37 @@
+checkpoint_path: /home/nipopovic/Projects/switchtasks/big_storage/root_shortcut/data/NIKOLA/Experiments/2021-06-16/14_exp/epoch=3-step=99.ckpt
+
+data_root_dir: /srv/beegfs02/scratch/composite_tasking/data/data_sets/PASCAL_MT
+exp_root_dir: /srv/beegfs02/scratch/switchtasks/data/NIKOLA/Experiments
+
+
+# Setup config
+# ------------
+which_system: composite_tasking # SPECIFY<------------------
+
+# Data set & task palette config
+# ------------------------------
+img_size:
+  - 32
+  - 32
+palette_mode: semantic_rule_R2
+task_list:
+  - parts
+  - seg
+  - normals
+  - saliency 
+  - edges 
+
+# Training config    
+# ---------------
+b_size: 2
+n_workers: 0
+
+pl_precision: 32
+
+pl_progress_bar_refresh_rate: 100
+pl_log_every_n_steps: 100
+pl_flush_logs_every_n_steps: 100
+pl_logger_use: false
+
+debug: true
+message: This is a debugging configuration & experiment

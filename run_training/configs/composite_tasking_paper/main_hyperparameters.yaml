@@ -139,6 +139,8 @@ pl_progress_bar_refresh_rate: 100
 pl_log_every_n_steps: 100
 # Specify how often to write logs to disk (in steps)
 pl_flush_logs_every_n_steps: 100
+# Specify whther to use torch lightning loggers like Tensorboard and wandb
+pl_logger_use: true
 # Specify after how much epochs to run the validation procedure
 pl_check_val_every_n_epoch: 1
 # Specify which portion of the training data to use each epoch
@@ -152,4 +154,4 @@ pl_limit_val_batches: 1.0
 debug: false
 # Specify a message explaining the experiment details
 # This is to leave notes why experiments were started
-message: This is a debugging configuration & experiment
+message: Training...

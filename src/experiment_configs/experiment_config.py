@@ -1,6 +1,10 @@
 import sys
 import os
 
+import json
+import random
+import string
+
 import torch
 import numpy as np
 
@@ -19,7 +23,7 @@ class ExperimentConfig:
     def __init__(self):
         pass
 
-    def _init_new_exp_generic(self, cfg, augmentation, input_transform, debug=False):
+    def _init_new_exp(self, cfg, augmentation, input_transform, debug=False):
         # Store input arguments
         self.cfg = cfg
         self.augmentation = augmentation
@@ -27,7 +31,7 @@ class ExperimentConfig:
         self.debug = debug
 
         # Check the validity of the input arguments
-        self._check_input_arguments_validity_new_exp()
+        self._check_input_arguments_validity()
 
         # Create the experiment main directory and save code
         self.exp_main_dir = self._create_main_exp_dir()
@@ -40,7 +44,7 @@ class ExperimentConfig:
         self._save_config()
 
         # Print the description of the new experiment
-        self.print_new_experiment_description()
+        self._print_new_experiment_description()
 
         # Create data set partitions
         self.data_sets = self._create_data_sets()
@@ -54,6 +58,55 @@ class ExperimentConfig:
 
         # Create trainer to train the system
         self.trainer = self._create_trainer()
+
+    def _load_existing_exp(self, checkpoint_path, load_trainer_ckp, cfg_overwrite, augmentation, input_transform, debug=False):
+        # Extract the checkpoint directory where other experiment data is saved
+        assert os.path.isfile(checkpoint_path)
+        load_dir = os.path.dirname(checkpoint_path)
+
+        # Store input arguments
+        self.checkpoint_path = checkpoint_path
+        self.augmentation = augmentation
+        self.input_transform = input_transform
+        self.debug = debug
+        
+        # Load the experiments saved configuration file
+        self.loaded_cfg = self._load_config(load_dir=load_dir)
+        self.cfg = self.loaded_cfg.copy()
+
+        # Overwrite specified configuration parameters
+        self._overwrite_specified_cfg(cfg_overwrite=cfg_overwrite)
+
+        # Check the validity of the input arguments
+        self._check_input_arguments_validity()
+
+        # Specify the experiment main directory
+        self.exp_main_dir = load_dir
+
+        # Modify the pythons print function 
+        # so it writes both on the console and to a log file in the dir
+        rnd_str = ''.join(random.choice(string.ascii_letters) for i in range(8))
+        self.print_to_log_file_also(log_name=f"loaded_print_log_{rnd_str}")
+
+        # Print the description of the new experiment
+        self._print_loaded_experiment_description()
+
+        # Create data set partitions
+        self.data_sets = self._create_data_sets()
+
+        # Create dataloaders for each partition
+        self.data_loaders = self._create_data_loaders()
+
+        # Create the system
+        # (containing the models, losses, metrics, optimizers, lr schedulers, ...)
+        self.system = self._load_system(checkpoint_path=checkpoint_path)
+
+        if load_trainer_ckp:
+            # load the trainer from the checkpoint
+            self.trainer = self._load_trainer(checkpoint_path=checkpoint_path)
+        else:
+            # Create trainer
+            self.trainer = self._create_trainer()
     
     def _create_data_sets(self):
         raise NotImplementedError
@@ -61,13 +114,10 @@ class ExperimentConfig:
     def _create_data_loaders(self):
         raise NotImplementedError
 
-    def _create_system(self):
-        raise NotImplementedError   
-
-    def evaluate(self):
+    def _get_system_constructor(self):
         raise NotImplementedError
 
-    def _check_input_arguments_validity_new_exp(self):
+    def _check_input_arguments_validity(self):
             """
             Check are the initialization input arguments valid
             """
@@ -96,7 +146,19 @@ class ExperimentConfig:
             if self.cfg["setup_cfg"]["code_root_dir"] is not None:
                 if not isinstance(self.cfg["setup_cfg"]["code_root_dir"], str):
                     raise ValueError  
-        
+    
+    def _create_system(self):
+        # Get the appropriate system and its initialization arguments
+        system, system_arg_dict = self._get_system_constructor()
+        # Construct the system
+        return system(**system_arg_dict) 
+
+    def _load_system(self, checkpoint_path):
+        # Get the appropriate system
+        system, _ = self._get_system_constructor()
+        # Load the system from a checkpoint
+        return system.load_from_checkpoint(checkpoint_path)
+
     def train(self):
         # Trains the model in the train split 
         # and validates on the validation split
@@ -105,6 +167,24 @@ class ExperimentConfig:
             train_dataloader=self.data_loaders["train"],
             val_dataloaders=self.data_loaders["val"],
         )  
+    
+    def evaluate(self):
+        # Evaluate the model on the test set
+        self.trainer.test(
+            model=self.system, 
+            test_dataloaders=self.data_loaders["test"], 
+            ckpt_path=None,  # TODO Explore providing jsut a ckpt_path and no model option
+            verbose=True
+        )
+
+    def _load_trainer(self, checkpoint_path):
+        """
+        Load a trainer along with it's state from a checkpoint file.
+        """
+        return pl.Trainer(
+            resume_from_checkpoint=checkpoint_path
+        )
+
 
     def _create_trainer(self):
         n_available_gpus = torch.cuda.device_count()
@@ -186,7 +266,7 @@ class ExperimentConfig:
             trainer_arguments["fast_dev_run"] = False # TODO This will end everything after first "epoch"
             trainer_arguments["limit_train_batches"] = 0.01
             trainer_arguments["limit_val_batches"] = 0.01
-            trainer_arguments["limit_test_batches"] = 0.01
+            #trainer_arguments["limit_test_batches"] = 1.0
             # length of training
             trainer_arguments["min_epochs"] = 3
             trainer_arguments["max_epochs"] = 3
@@ -216,7 +296,7 @@ class ExperimentConfig:
         return pl.Trainer(**trainer_arguments) 
 
     def _create_pl_logger(self):
-        if "exp_main_dir" in self.cfg["setup_cfg"]:
+        if self.exp_main_dir and self.cfg["training_cfg"]["pl_logger_use"]:
             logger = []
 
             # Tensorboard logger
@@ -255,7 +335,7 @@ class ExperimentConfig:
         
     def _create_pl_profiler(self):
         # Only if an experiment direcotyr exists
-        if "exp_main_dir" in self.cfg["setup_cfg"]:
+        if self.exp_main_dir:
             prof_out_file = os.path.join(self.cfg["setup_cfg"]["exp_main_dir"], "runtime_profiling.txt")
         else:
             return None
@@ -276,7 +356,7 @@ class ExperimentConfig:
             raise NotImplementedError 
     
     def _create_pl_model_checkpoint_callback(self):
-        if "exp_main_dir" in self.cfg["setup_cfg"]:
+        if self.exp_main_dir and not self.debug:
             return ModelCheckpoint(
                 dirpath=self.cfg["setup_cfg"]["exp_main_dir"],
                 filename=None,
@@ -354,22 +434,43 @@ class ExperimentConfig:
             dictionary=self.cfg, 
             save_path=self.exp_main_dir, 
             file_name="exp_cfg.json") 
+
+    def _load_config(self, load_dir):
+        # Load the experiments saved configuration file
+        assert os.path.isdir(load_dir)
+        cfg_json_pth = os.path.join(load_dir, "exp_cfg.json")
+        with open(cfg_json_pth , 'r') as fh:
+            loaded_cfg = json.load(fh)
+
+        return loaded_cfg
+
+    def _overwrite_specified_cfg(self, cfg_overwrite):
+        # TODO This is currently hardcoded for the config to be a 
+        # TODO dictionary with 2-depth levels (category followed by category attributes)
+        # Overwrite specified configuration parameters
+        for category in cfg_overwrite:
+            assert category in self.loaded_cfg
+            if cfg_overwrite[category] is not None:
+                for k in cfg_overwrite[category]:
+                    assert k in self.loaded_cfg[category]
+                    self.cfg[category][k] = cfg_overwrite[category][k]
     
-    def print_to_log_file_also(self):
+    def print_to_log_file_also(self, log_name=None):
         """
         If an experiment directory is created, modify the pythons print
         function so it writes both on the console and to a log file in the dir
         Otherwise, just write in the console
         """
         class Logger(object):
-            def __init__(self, exp_main_dir):
+            def __init__(self, exp_main_dir, log_name):
                 self.terminal = sys.stdout
                 self.exp_main_dir = exp_main_dir
+                self.log_name = log_name if log_name is not None else "print_log"
 
             def write(self, message):
                 self.terminal.write(message)
                 if self.exp_main_dir is not None:
-                    with open(os.path.join(self.exp_main_dir, "print_log.txt"), "a", encoding = 'utf-8') as self.log:            
+                    with open(os.path.join(self.exp_main_dir, f"{self.log_name}.log"), "a", encoding = 'utf-8') as self.log:            
                         self.log.write(message)
 
             def flush(self):
@@ -377,12 +478,41 @@ class ExperimentConfig:
                 #this handles the flush command by doing nothing.
                 #you might want to specify some extra behavior here.
                 pass
-        sys.stdout = Logger(exp_main_dir=self.exp_main_dir)  
+        sys.stdout = Logger(
+            exp_main_dir=self.exp_main_dir,
+            log_name=log_name
+        )  
 
-    # TODO Adapt to more nesting in the configuration dict (make recursive)
-    def print_new_experiment_description(self):
+    def _print_new_experiment_description(self):
         """
         Print the description of the new experiment in the console and the log files.
+        """
+        print("---------------------------------------------------------------------------------")
+        print("---------------------------------------------------------------------------------")
+        print(f"              Starting a NEW experiment in: {self.exp_main_dir}")
+        cfg_msg = self._print_exp_cfg()
+        print("---------------------------------------------------------------------------------")
+        print("---------------------------------------------------------------------------------")
+        
+        return cfg_msg
+
+    def _print_loaded_experiment_description(self):
+        """
+        Print the description of the loaded experiment in the console and the log files.
+        """
+        print("---------------------------------------------------------------------------------")
+        print("---------------------------------------------------------------------------------")
+        print(f"              Starting a LOADED experiment from : {self.exp_main_dir}")
+        cfg_msg = self._print_exp_cfg()
+        print("---------------------------------------------------------------------------------")
+        print("---------------------------------------------------------------------------------")
+        
+        return cfg_msg
+    
+    # TODO Adapt to more nesting in the configuration dict (make recursive)
+    def _print_exp_cfg(self):
+        """
+        Print the configuration of the new experiment in the console and the log files.
         """
         cfg_msg = ""
         cfg_msg += "[Experiment configuration]\n"
@@ -399,14 +529,8 @@ class ExperimentConfig:
         cfg_msg += "Input image transformations: \n{:s}\n".format(str(self.input_transform))
         cfg_msg += "---------------------------------------------------------------------------------\n"
         cfg_msg += "---------------------------------------------------------------------------------\n\n"
-        
-        print("---------------------------------------------------------------------------------")
-        print("---------------------------------------------------------------------------------")
-        print(f"              STARTING NEW EXPERIMENT : {self.exp_main_dir}")
         print(cfg_msg)
-        print("---------------------------------------------------------------------------------")
-        print("---------------------------------------------------------------------------------")
-        
+
         return cfg_msg
 
     def _which_device(self):

@@ -1,3 +1,6 @@
+data_root_dir: /srv/beegfs02/scratch/composite_tasking/data/data_sets/PASCAL_MT
+exp_root_dir: /srv/beegfs02/scratch/switchtasks/data/NIKOLA/Experiments
+
 # Setup config
 # ------------
 project_name: CompositeTasking
@@ -51,8 +54,8 @@ wd: 0.00001
 sgd_momentum: 0.9
 sgd_nesterov_momentum: true
 
-pl_max_epochs: 100
-pl_min_epochs: 100
+pl_max_epochs: 4
+pl_min_epochs: 4
 pl_early_stop_patience: -1
 b_size: 2
 n_workers: 0
@@ -64,12 +67,13 @@ pl_precision: 32
 pl_sync_batchnorm: true
 pl_which_profiler: simple
 
-pl_progress_bar_refresh_rate: 100
-pl_log_every_n_steps: 100
-pl_flush_logs_every_n_steps: 100
+pl_progress_bar_refresh_rate: 1
+pl_log_every_n_steps: 1
+pl_flush_logs_every_n_steps: 1
+pl_logger_use: false
 pl_check_val_every_n_epoch: 1
-pl_limit_train_batches: 1.0
-pl_limit_val_batches: 1.0
+pl_limit_train_batches: 0.01
+pl_limit_val_batches: 0.01
 
 debug: true
 message: ...This is a debugging configuration & experiment...

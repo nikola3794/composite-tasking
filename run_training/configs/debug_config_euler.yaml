@@ -73,6 +73,7 @@ pl_which_profiler: simple
 pl_progress_bar_refresh_rate: 100
 pl_log_every_n_steps: 100
 pl_flush_logs_every_n_steps: 100
+pl_logger_use: false
 pl_check_val_every_n_epoch: 1
 pl_limit_train_batches: 1.0
 pl_limit_val_batches: 1.0

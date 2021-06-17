@@ -9,7 +9,7 @@ We define the concept of CompositeTasking as the fusion of multiple, spatially d
 Learning to perform spatially distributed tasks is motivated by the frequent availability of only sparse labels across tasks, and the desire for a compact multi-tasking network.
 To facilitate CompositeTasking, we introduce a novel task conditioning model -- a single encoder-decoder network that performs multiple, spatially varying tasks at once.
 The proposed network takes an image and a set of pixel-wise dense task requests as inputs, and performs the requested prediction task for each pixel. 
-A strength of the proposed method is demonstrated by only having to supply sparse supervision per task.
+One strength of the proposed method is demonstrated by only having to supply sparse supervision per task.
 The obtained results are on par with our baselines that use dense supervision and a multi-headed multi-tasking design.
 
 # Requirements

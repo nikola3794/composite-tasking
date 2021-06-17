@@ -21,7 +21,7 @@ echo "Number of CPU threads/core: $(nproc --all)"
 
 # Transfer ImageNet to scratch
 echo "Transfering data to cluster scratch..."
-tar -I pigz -xf /cluster/work/cvl/nipopovic/data/PASCAL_MT/PASCAL_MT.tar.gz -C ${TMPDIR}/
+tar -I pigz -xf /cluster/work/cvl/nipopovic/data/PASCAL_MT/pascal_mt.tar.gz -C ${TMPDIR}/
 echo "Transfered data to cluster scratch"
 
 # Set project paths

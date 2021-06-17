@@ -154,11 +154,12 @@ class System(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         # Execute one batch step
-        return self._one_step(
+        step_output = self._one_step(
             batch=batch, 
             batch_idx=batch_idx, 
             which_split="test"
         )
+        return step_output
 
     def test_step_end(self, out):
         # Log losses

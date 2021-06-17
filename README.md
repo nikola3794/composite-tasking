@@ -42,6 +42,36 @@ For more details about the data set take a look at their paper or code: https://
 
 The data set can be downloaded at the following link - https://data.vision.ee.ethz.ch/nipopovic/PASCAL_MT.zip. It contains some additional metadata and labels used in this work. Create a directory for the data set and unizip it inside it. The .zip also contains a readme.txt file with basic information about the dataset and what is contained where.
 
+# Code structure
+The directory src contains the source code of this project and it is structured in the following way:
+```
+src
+├── data_sets
+│   ├── pascal_mt
+│   ├── task_palette_gen
+│   └── utils
+├── experiment_configs
+│   └── composite_tasking
+├── systems
+│   ├── composite_tasking
+│   ├── multi_tasking
+│   └── single_tasking
+├── models
+│   ├── original_implementation
+│   └── blocks
+├── losses
+├── metrics
+└── misc
+```
+
+* `/root/src/data_sets/` contains code related to data loading and processing.
+    * `/root/src/data_sets/pascal_mt` contains code to load the PASCAL-MT data set. The core is inside the `data_set.py` script.
+    * `/root/src/data_sets/task_palette_gen` contains the code to generate Task Palettes in various different regimes.
+    * `/root/src/data_sets/utils` contains some helper files for data loading.
+* `/root/src/experiment_configs` contains code related to configuring an experiment. The script `./experiment_config.py` is an abstract class which takes the experiment arguments, creates a local directory for saving model checkpoints, logging (local .txt file, tensorboard, wandb logging) and various experiment metadata snapshots. It also creates data loaders for the used data partitions, and creates a PyTorch Lightning system (contains model, optimizer, losses, metrics) and trainer (for running the training procedure). This abstract class is supposed to serve as a template which can be used in different Deep Learning projects. The user needs to implement some problem-specific functions like constructing data loaders and PyTorch Lightning systems.
+    * `/root/src/experiment_configs/composite_tasking` inherites the abstract experiment configuring class `../experiment_config.py` and implements functions specific for the problem of CompositeTasking. It implements problem-specific data loaders, systems and saves problem-specific metadata to the current experiments log directory.
+* `/root/src/systems` contains code related to constructing PyTorch Lightning systems. `./system.py` is an abstract
+
 # Results
 The predictions of the CompositeTasking Network which has been trained using the semantic R2 Task Palette rule can be seen in the following image:
 ![R2_rule_predictions](https://github.com/nikola3794/composite-tasking/blob/main/images/semantic_rule_pred.PNG)

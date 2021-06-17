@@ -99,14 +99,14 @@ python3 -u run_training/train.py \
 --code_root_dir=PATH_TO_CODE_ROOT_DIR \
 --exp_root_dir=PATH_TO_EXPERIMENT_ROOT_DIR
 ```
-`PATH_TO_EXPERIMENT_ROOT_DIR` should be a path to a directory where each new experiment is going to create a logging directory (model checkpoints, log files, current training metadata). `PATH_TO_CODE_ROOT_DIR` is specified so that a current snapshot of the code is saved in the experiment's logging directory.
+`PATH_TO_EXPERIMENT_ROOT_DIR` should be a path to a directory, where each new experiment is going to create a logging directory (model checkpoints, log files, current training metadata). `PATH_TO_CODE_ROOT_DIR` is specified so that a current snapshot of the code is saved in the experiment's logging directory.
 
 The progress of the experiment should be shown on the print console. If specified, the progress is also going to be shown in the current experiment directory's .txt file, tensorboard directory, as well as in wandb online.
 
-Currently, multi-GPU training does not work. There is an issue in the metric syncing.
+Currently, multi-GPU training does not work. There is an issue with the metric syncing.
 
 # Evaluate models
-Use the following script `/root/run_evaluation/evaluate.py` to evaluate models. It also uses a command line argparser for specifying the evaluation configuration, just like the training script. The argument values can also be given through the command line, .yaml file, or mixed.
+Use the following script `/root/run_evaluation/evaluate.py` to evaluate models. It also uses a command line argparser for specifying the evaluation configuration, just like in the training script. The argument values can also be given through the command line, .yaml file, or mixed.
 For more details on the descriptions and expected values for most of the input arguments, take a look at the following file `/root/run_evaluation/configs/composite_tasking_paper/main_hyperparameters.yaml` and it's comments. The directory `/root/run_evaluation/configs/composite_tasking_paper/` contains .yaml files specifying configurations of the most important evaluations from the CompositeTasking paper.
 
 An example of the evaluation scripts call from the `/root/` directory of the project:
@@ -116,11 +116,11 @@ python3 -u run_evaluation/evaluate.py \
 --checkpoint_path=PATH_TO_CHECKPOINT_FILE \
 --data_root_dir=PATH_TO_DATASET_ROOT_DIR \
 ```
-`PATH_TO_CHECKPOINT_FILE` should be a path to the checkpoint file to be evaluated. The structure of the generated experiment's logging directory, where the checkpoint is file is saved, should not be changed because the evaluation script will extract it's path and also load some other saved metadata inside it. The result of the evaluation is going to be saved in a new .txt file generated in the experiment's logging directory.
+`PATH_TO_CHECKPOINT_FILE` should be a path to the checkpoint file to be evaluated. The structure of the experiment's logging directory, where the checkpoint is file is saved, should not be changed. The evaluation script will extract the path of the experiment's logging directory and load some other metadata files saved inside it. The result of the evaluation is going to be displayed in the print console and saved in a new .txt file generated in the experiment's directory.
 
-Currently, multi-GPU training does not work. There is an issue in the metric syncing.
+Currently, multi-GPU training does not work. There is an issue with the metric syncing.
 
-For the proper evaluation of edge detecetion, which is reported in the CompositeTasking paper, the [seism repository](https://github.com/jponttuset/seism) needs to be used. In order to do so, edge predictions need to be saved as .png images with the same size as the input image and provided to the seism evaluation protocol along with the labels contained in the dataset. Best place to save the predictions as images in the code is to do it in the training_step() method of `/root/src/systems/system.py`. If having trouble with running the seism repository, take a look at [this repository](https://github.com/nikola3794/edge-evaluation-PASCAL-MT-tmp), which is a quick solution with instructions how to call the seism repository.
+For the proper evaluation of edge detecetion, which is reported in the CompositeTasking paper, the [seism repository](https://github.com/jponttuset/seism) needs to be used (evaluation code is written in MATLAB and it is required to have it installed). In order to do so, edge predictions need to be saved as .png images with the same size as the input image and provided to the seism evaluation protocol along with the labels contained in the dataset. Best place to save the predictions as images in the code is to do it in the training_step() method of `/root/src/systems/system.py`. If having trouble with running the seism repository, take a look at [this repository](https://github.com/nikola3794/edge-evaluation-PASCAL-MT-tmp), which is a quick solution with instructions how to call the seism repository.
 
 # Example results
 The predictions of the CompositeTasking Network which has been trained using the semantic R2 Task Palette rule can be seen in the following image:

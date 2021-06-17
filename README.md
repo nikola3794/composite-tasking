@@ -15,6 +15,7 @@ The obtained results are on par with our baselines that use dense supervision an
 # Requirements
 This project is implemented using Python and the PyTorch Deep Learning framework. Following libraries are used:
 
+* python 3.8.5
 * pytorch 1.7.1+cu110
 * torchvision 0.8.2+cu110
 * pytorch-lightning 1.3.5
@@ -88,7 +89,36 @@ src
 The directories `/root/run_training/` and `/root/run_evaluation/` contain scripts which call the core code from `/root/src/` in order to run experiments and conduct evaluations. They will be commented later.
 
 # Train models
-To train models use the following script: `/root/run_training/train.py`. 
+Use the following script `/root/run_training/train.py` to train models. It uses a command line argparser for specifying the experiment configuration. One option is to provide the argument values to the script when calling it from the command line. Another option is to specify the argument values in a .yaml file and provide the path of the .yaml file when calling the training script (along with argument values not specified in the .yaml file). For more details on the descriptions and expected values for most of the input arguments, take a look at the following file `/root/run_training/configs/composite_tasking_paper/main_hyperparameters.yaml` and it's comments. The directory `/root/run_training/configs/composite_tasking_paper/` contains .yaml files specifying configurations of the most important experiments from the CompositeTasking paper.
+
+An example of the training scripts call from the `/root/` directory of the project:
+```
+python3 -u run_training/train.py \
+--config_file_path=PATH_TO_YAML_CONFIG_FILE \
+--data_root_dir=PATH_TO_DATASET_ROOT_DIR \
+--code_root_dir=PATH_TO_CODE_ROOT_DIR \
+--exp_root_dir=PATH_TO_EXPERIMENT_ROOT_DIR
+```
+`PATH_TO_EXPERIMENT_ROOT_DIR` should be a path to a directory where each new experiment is going to create a logging directory (model checkpoints, log files, current training metadata). `PATH_TO_CODE_ROOT_DIR` is specified so that a current snapshot of the code is saved in the experiment's logging directory.
+
+The progress of the experiment should be shown on the print console. If specified, the progress is also going to be shown in the current experiment directory's .txt file, tensorboard directory, as well as in wandb online.
+
+Currently, multi-GPU training does not work. There is an issue in the metric syncing.
+
+# Evaluate models
+Use the following script `/root/run_evaluation/evaluate.py` to evaluate models. It also uses a command line argparser for specifying the evaluation configuration, just like the training script. The argument values can also be given through the command line, .yaml file, or mixed.
+For more details on the descriptions and expected values for most of the input arguments, take a look at the following file `/root/run_evaluation/configs/composite_tasking_paper/main_hyperparameters.yaml` and it's comments. The directory `/root/run_evaluation/configs/composite_tasking_paper/` contains .yaml files specifying configurations of the most important evaluations from the CompositeTasking paper.
+
+An example of the training scripts call from the `/root/` directory of the project:
+```
+python3 -u run_training/train.py \
+--config_file_path=PATH_TO_YAML_CONFIG_FILE \
+--checkpoint_path=PATH_TO_CHECKPOINT_FILE \
+--data_root_dir=PATH_TO_DATASET_ROOT_DIR \
+```
+`PATH_TO_CHECKPOINT_FILE` should be a path to the checkpoint file to be evaluated. The structure of the generated experiment's logging directory, where the checkpoint is file is saved, should not be changed because the evaluation script will extract it's path and also load some other saved metadata inside it. The result of the evaluation is going to be saved in a new .txt file generated in the experiment's logging directory.
+
+Currently, multi-GPU training does not work. There is an issue in the metric syncing.
 
 # Example results
 The predictions of the CompositeTasking Network which has been trained using the semantic R2 Task Palette rule can be seen in the following image:
@@ -98,7 +128,7 @@ The prediction of the of the CompositeTasking Network which has been trained usi
 ![Rnd_rule_predictions](https://github.com/nikola3794/composite-tasking/blob/main/images/random_rule_pred.png)
 
 # Contact
-Please feel free to rech out if there are any questions, suggestion or issues with the code. My e-mail is nipopovic@vision.ee.ethz.ch.
+Please feel free to reach out if there are any questions, suggestion or issues with the code. My e-mail is nipopovic@vision.ee.ethz.ch.
 
 # Citation
 If you use this code, please consider citing the following paper:

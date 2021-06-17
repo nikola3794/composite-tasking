@@ -87,7 +87,10 @@ src
 
 The directories `/root/run_training/` and `/root/run_evaluation/` contain scripts which call the core code from `/root/src/` in order to run experiments and conduct evaluations. They will be commented later.
 
-# Results
+# Train models
+To train models use the following script: `/root/run_training/train.py`. 
+
+# Example results
 The predictions of the CompositeTasking Network which has been trained using the semantic R2 Task Palette rule can be seen in the following image:
 ![R2_rule_predictions](https://github.com/nikola3794/composite-tasking/blob/main/images/semantic_rule_pred.PNG)
 

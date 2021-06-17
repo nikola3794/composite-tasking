@@ -65,12 +65,29 @@ src
 ```
 
 * `/root/src/data_sets/` contains code related to data loading and processing.
-    * `/root/src/data_sets/pascal_mt` contains code to load the PASCAL-MT data set. The core is inside the `data_set.py` script.
-    * `/root/src/data_sets/task_palette_gen` contains the code to generate Task Palettes in various different regimes.
-    * `/root/src/data_sets/utils` contains some helper files for data loading.
-* `/root/src/experiment_configs` contains code related to configuring an experiment. The script `./experiment_config.py` is an abstract class which takes the experiment arguments, creates a local directory for saving model checkpoints, logging (local .txt file, tensorboard, wandb logging) and various experiment metadata snapshots. It also creates data loaders for the used data partitions, and creates a PyTorch Lightning system (contains model, optimizer, losses, metrics) and trainer (for running the training procedure). This abstract class is supposed to serve as a template which can be used in different Deep Learning projects. The user needs to implement some problem-specific functions like constructing data loaders and PyTorch Lightning systems.
-    * `/root/src/experiment_configs/composite_tasking` inherites the abstract experiment configuring class `../experiment_config.py` and implements functions specific for the problem of CompositeTasking. It implements problem-specific data loaders, systems and saves problem-specific metadata to the current experiments log directory.
-* `/root/src/systems` contains code related to constructing PyTorch Lightning systems. `./system.py` is an abstract
+    * `/root/src/data_sets/pascal_mt/` contains code to load the PASCAL-MT data set. The core is inside the `data_set.py` script.
+    * `/root/src/data_sets/task_palette_gen/` contains the code to generate Task Palettes in various different regimes.
+    * `/root/src/data_sets/utils/` contains some helper files for data loading.
+
+* `/root/src/experiment_configs/` contains code related to configuring an experiment. The script `./experiment_config.py` is an abstract class which takes the experiment arguments, creates a local directory for saving model checkpoints, logging (local .txt file, tensorboard, wandb logging) and various experiment metadata snapshots. It also creates data loaders for the used data partitions, and creates a PyTorch Lightning system (contains model, optimizer, losses, metrics) and trainer (for running the training procedure). This abstract class is supposed to serve as a template which can be used in different Deep Learning projects. The user needs to implement some problem-specific functions like constructing data loaders and PyTorch Lightning systems.
+    * `/root/src/experiment_configs/composite_tasking/` inherites the abstract experiment configuring class `../experiment_config.py` and implements functions specific for the problem of CompositeTasking. It implements problem-specific data loaders, systems and saves problem-specific metadata to the current experiments log directory.
+
+* `/root/src/systems/` contains code related to constructing PyTorch Lightning systems. `./system.py` is an abstract class which constructs a system by taking the provided experiment arguments and constructs the model, optimizer, losses and metrics. It also implements the training, validation and testing epoch-processing functionallities which are called in the PyTorch Lightning Trainer. It is intended to be implemented as a system which can be used for other DeepLearning projects (it contains a few CompositeTasking-specific functionallities, which can be removed for further re-use). Since different experiments, even inside the same problen, can have different optimizers, losses and metric updates, they should be implemented in the actual system which inherites this class.
+    * `/root/src/systems/composite_tasking/` inherites `../system.py` and implements the system for running CompositeTasking experiments.
+    * `/root/src/systems/multi_tasking/` inherites `../system.py` and implements the system for running Multi-tasking experiments.
+    * `/root/src/systems/single_tasking/` inherites `../system.py` and implements the system for running Single-Tasking experiments.
+
+* `/root/src/models/` contains code related to constructing model architectures. Scripts which construct the whole model can be found in this directory.
+    * `/root/src/models/blocks/` contains various building-blocks of the defined architectures.
+    * `/root/src/models/original_implementation/` contains original implementations of the models used in the CompositeTasking paper.
+
+* `/root/src/losses/` contains code related to loss function calculation.
+
+* `/root/src/metrics/` contains code related to metric calculation.
+
+* `/root/src/misc/` contains some miscellaneous helper scripts.
+
+The directories `/root/run_training/` and `/root/run_evaluation/` contain scripts which call the core code in order to run experiments and conduct evaluations. They will be commented later.
 
 # Results
 The predictions of the CompositeTasking Network which has been trained using the semantic R2 Task Palette rule can be seen in the following image:

@@ -1,4 +1,4 @@
-checkpoint_path: /cluster/work/cvl/nipopovic/experiments/composite_tasking/2021-06-16/12_expFhml/epoch=99-step=49999.ckpt
+checkpoint_path: /cluster/work/cvl/nipopovic/experiments/composite_tasking/2021-06-16/8_expdybe/epoch=99-step=49999.ckpt
 data_root_dir: /scratch/175763407.tmpdir/PASCAL_MT
 
 # Setup config
@@ -17,7 +17,7 @@ img_size:
 palette_mode: single_task
 # Specify a list of tasks to be used
 task_list:
-  - seg
+  - edges
 
 # Training config    
 # ---------------

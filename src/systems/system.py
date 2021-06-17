@@ -1,3 +1,4 @@
+import os
 
 import torch
 from torch import nn
@@ -166,7 +167,7 @@ class System(pl.LightningModule):
         )
 
         # Save edge predictions as images, in order to evaluate later
-        self.save_edge_preds(step_output=step_output)
+        # self.save_edge_preds(step_output=step_output)
 
         return step_output
 
@@ -503,7 +504,9 @@ class System(pl.LightningModule):
         return loss_total
     
     def save_edge_preds(self, step_output):
-        print("aaaa")
+        # TODO Implementation is a bit messy, improve
+        # TODO Main improvement would be to specify arguments in the evaluation script
+        # TODO to save when specified, and otherwise not to save
         # Create save directory inside experiment main dir, if it doesnt exist already
         assert os.path.isdir(self.cfg["setup_cfg"]["exp_root_dir"])
         edge_dir_path = os.path.join(self.cfg["setup_cfg"]["exp_root_dir"], f"EDGES_{self.cfg['data_set_cfg']['palette_mode']}")
@@ -519,22 +522,26 @@ class System(pl.LightningModule):
                 return
             edge_pred = step_output["preds"]["edges"]
         else:
+            # Check in which spatial locations have edges been predicted
             edge_id = self.task_to_id_dict["edges"]
             select_mask = (step_output["batch"]["task_palette"] == edge_id)
             select_mask = select_mask.unsqueeze(1).repeat(1, 3, 1, 1).detach()
 
+            # Take edges only where they are predicted, put zeros everywhere
             pred = step_output["preds"]
-            zero_tensor = torch.zeros_like(edge_pred, device=self.device)
+            zero_tensor = torch.zeros_like(pred, device=self.device)
             edge_pred = torch.where(select_mask, pred, zero_tensor)
         
         # Save the images one by one
         for (edge_pred_i, img_name_i, orig_size_i) in zip(edge_pred, step_output["batch"]["img_name"], step_output["batch"]["orig_cv2_size"]):
-            # save path for the current edge prediction
+            # Save path for the current edge prediction
             img_name_i = f"{img_name_i.split('.')[0]}.png"
             img_save_path = os.path.join(edge_dir_path, img_name_i)
 
-            # Transform edge prediction to cv2 format and original image size
+            # Transform edge prediction to appropriate format format and original image size
+            edge_pred_i = torch.nn.Upsample(size=(orig_size_i[0], orig_size_i[1]))(edge_pred_i.unsqueeze(0))[0]
+            edge_pred_i = torch.mean(edge_pred_i, dim=0).squeeze()
             edge_pred_i = edge_pred_i.cpu().numpy() * 255.0
-            edge_pred_i = cv2.resize(edge_pred_i, dsize=(orig_size_i[1], orig_size_i[0]), interpolation=cv2.INTER_LINEAR)
 
+            # Save image
             imageio.imwrite(os.path.join(img_save_path), edge_pred_i.astype(np.uint8))

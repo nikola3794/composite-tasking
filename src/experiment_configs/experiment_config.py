@@ -77,11 +77,12 @@ class ExperimentConfig:
         # Overwrite specified configuration parameters
         self._overwrite_specified_cfg(cfg_overwrite=cfg_overwrite)
 
-        # Check the validity of the input arguments
-        self._check_input_arguments_validity()
-
         # Specify the experiment main directory
         self.exp_main_dir = load_dir
+        self.cfg["setup_cfg"]["exp_root_dir"] = load_dir
+
+        # Check the validity of the input arguments
+        self._check_input_arguments_validity()
 
         # Modify the pythons print function 
         # so it writes both on the console and to a log file in the dir

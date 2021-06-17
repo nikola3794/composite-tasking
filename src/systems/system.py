@@ -1,10 +1,15 @@
+
 import torch
 from torch import nn
 import torch.nn.functional as F
 
 import pytorch_lightning as pl
-
 import torchmetrics
+
+import cv2
+import numpy as np
+
+import imageio
 
 from ..losses.balanced_bce import BalancedBCELoss
 from ..losses.cosine_similarity_loss import CosineSImilarityLoss
@@ -159,6 +164,10 @@ class System(pl.LightningModule):
             batch_idx=batch_idx, 
             which_split="test"
         )
+
+        # Save edge predictions as images, in order to evaluate later
+        self.save_edge_preds(step_output=step_output)
+
         return step_output
 
     def test_step_end(self, out):
@@ -492,3 +501,40 @@ class System(pl.LightningModule):
         loss_total.backward()
 
         return loss_total
+    
+    def save_edge_preds(self, step_output):
+        print("aaaa")
+        # Create save directory inside experiment main dir, if it doesnt exist already
+        assert os.path.isdir(self.cfg["setup_cfg"]["exp_root_dir"])
+        edge_dir_path = os.path.join(self.cfg["setup_cfg"]["exp_root_dir"], f"EDGES_{self.cfg['data_set_cfg']['palette_mode']}")
+        if not os.path.isdir(edge_dir_path):
+            os.mkdir(edge_dir_path)
+        edge_dir_path = os.path.join(edge_dir_path, "edges")
+        if not os.path.isdir(edge_dir_path):
+            os.mkdir(edge_dir_path)
+
+        # Extract the edge prediction based on the used task_palette
+        if self.cfg["data_set_cfg"]["palette_mode"] in ["all_tasks"]:
+            if "edges" not in self.cfg["data_set_cfg"]["used_tasks"]:
+                return
+            edge_pred = step_output["preds"]["edges"]
+        else:
+            edge_id = self.task_to_id_dict["edges"]
+            select_mask = (step_output["batch"]["task_palette"] == edge_id)
+            select_mask = select_mask.unsqueeze(1).repeat(1, 3, 1, 1).detach()
+
+            pred = step_output["preds"]
+            zero_tensor = torch.zeros_like(edge_pred, device=self.device)
+            edge_pred = torch.where(select_mask, pred, zero_tensor)
+        
+        # Save the images one by one
+        for (edge_pred_i, img_name_i, orig_size_i) in zip(edge_pred, step_output["batch"]["img_name"], step_output["batch"]["orig_cv2_size"]):
+            # save path for the current edge prediction
+            img_name_i = f"{img_name_i.split('.')[0]}.png"
+            img_save_path = os.path.join(edge_dir_path, img_name_i)
+
+            # Transform edge prediction to cv2 format and original image size
+            edge_pred_i = edge_pred_i.cpu().numpy() * 255.0
+            edge_pred_i = cv2.resize(edge_pred_i, dsize=(orig_size_i[1], orig_size_i[0]), interpolation=cv2.INTER_LINEAR)
+
+            imageio.imwrite(os.path.join(img_save_path), edge_pred_i.astype(np.uint8))

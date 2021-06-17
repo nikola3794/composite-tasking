@@ -13,7 +13,7 @@ One strength of the proposed method is demonstrated by only having to supply spa
 The obtained results are on par with our baselines that use dense supervision and a multi-headed multi-tasking design.
 
 # Requirements
-This project is implemented using Python and the PyTorch Deep Learning framework. Following libraries are used:
+This project is implemented using Python3 and the PyTorch Deep Learning framework. Following libraries are used:
 
 * python 3.8.5
 * pytorch 1.7.1+cu110

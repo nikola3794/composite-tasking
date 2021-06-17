@@ -30,11 +30,13 @@ export PYTHONPATH=${PYTHONPATH}:${PROJECT_ROOT_DIR}
 cd ${PROJECT_ROOT_DIR}
 pwd
 
+CHECKPOINT_PATH=/cluster/work/cvl/nipopovic/experiments/composite_tasking/2021-06-16/8_expdybe/epoch=99-step=49999.ckpt
+
 CONFIGS="ST_edges.yaml ST_normals.yaml ST_parts.yaml ST_saliency.yaml ST_seg.yaml R2.yaml R3.yaml MT.yaml Rrnd.yaml R1r.yaml"
 for cfg in $CONFIGS; do 
     # call the evaluation script
     python3 -u run_evaluation/evaluate.py \
     --config_file_path=${PROJECT_ROOT_DIR}/run_evaluation/configs/composite_tasking_paper/$cfg \
-    --checkpoint_path=PATH \
+    --checkpoint_path=${CHECKPOINT_PATH} \
     --data_root_dir=${TMPDIR}/PASCAL_MT
 done

@@ -6,6 +6,7 @@ __pycache__
 .vscodes
 #*/submit_to_cluster
 *.log
+lightning_logs/*
 
 # Automatically generated .gitingore
 # ----------------------------------

@@ -1,6 +1,6 @@
 # CompositeTasking: Understanding Images by Spatial Composition of Tasks
 
-This repository implements ideas discussed in the CVPR2021 paper "Nikola Popovic, Danda Pani Paudel, Thomas Probst, Guolei Sun, Luc Van Gool - CompositeTasking: Understanding Images by Spatial Composition of Tasks" (https://arxiv.org/abs/2012.09030).
+This repository implements ideas discussed in the CVPR2021 paper ["Nikola Popovic, Danda Pani Paudel, Thomas Probst, Guolei Sun, Luc Van Gool - CompositeTasking: Understanding Images by Spatial Composition of Tasks"](https://arxiv.org/abs/2012.09030).
 
 ![CTN_illustration](https://github.com/nikola3794/composite-tasking/blob/main/images/composit_net_smaller.png)
 
@@ -37,9 +37,9 @@ Also, the code has only been used and tested with a NVIDIA CUDA capable GPU, but
 The data set used in this project is the PASCAL-MT data set, which is an extension of PASCAL for the purpose of Multi-Tasking introduced in "K. K. Maninis et al. - Attentive Single-Tasking of Multiple Tasks". 
 The data set contains 4998 training and 5105 validation images, as well as labels for the task of semantic segemntation, human body parts, surface normals, saliency and edges.
 While constructing the data set, authors distilled labels for some of the tasks while others were used from PASCAL or PASCAL-Context.
-For more details about the data set take a look at their paper or code: paper-https://arxiv.org/abs/1904.08918, code-https://github.com/facebookresearch/astmt.
+For more details about the data set take a look at their [paper](https://arxiv.org/abs/1904.08918) or [code](https://github.com/facebookresearch/astmt).
 
-The data set can be downloaded at the following link - https://data.vision.ee.ethz.ch/nipopovic/PASCAL_MT.zip. It contains some additional metadata and labels used in this work. The .zip also contains a readme.txt file with basic information about the dataset and what is contained where. Choose a directory where you want to store the data set and unzip it (unzipping will create the main data set directory with all the content inside it). The path to the root of the data set folder will need to be specified in the training and evaluation scripts.
+The data set can be downloaded at the [following link](https://data.vision.ee.ethz.ch/nipopovic/PASCAL_MT.zip). It contains some additional metadata and labels used in this work. The .zip also contains a readme.txt file with basic information about the dataset and what is contained where. Choose a directory where you want to store the data set and unzip it (unzipping will create the main data set directory with all the content inside it). The path to the root of the data set folder will need to be specified in the training and evaluation scripts.
 
 # Code structure
 The directory `/root/src/` contains the source code of this project and it is structured in the following way:
@@ -109,9 +109,9 @@ Currently, multi-GPU training does not work. There is an issue in the metric syn
 Use the following script `/root/run_evaluation/evaluate.py` to evaluate models. It also uses a command line argparser for specifying the evaluation configuration, just like the training script. The argument values can also be given through the command line, .yaml file, or mixed.
 For more details on the descriptions and expected values for most of the input arguments, take a look at the following file `/root/run_evaluation/configs/composite_tasking_paper/main_hyperparameters.yaml` and it's comments. The directory `/root/run_evaluation/configs/composite_tasking_paper/` contains .yaml files specifying configurations of the most important evaluations from the CompositeTasking paper.
 
-An example of the training scripts call from the `/root/` directory of the project:
+An example of the evaluation scripts call from the `/root/` directory of the project:
 ```
-python3 -u run_training/train.py \
+python3 -u run_evaluation/evaluate.py \
 --config_file_path=PATH_TO_YAML_CONFIG_FILE \
 --checkpoint_path=PATH_TO_CHECKPOINT_FILE \
 --data_root_dir=PATH_TO_DATASET_ROOT_DIR \
@@ -119,6 +119,8 @@ python3 -u run_training/train.py \
 `PATH_TO_CHECKPOINT_FILE` should be a path to the checkpoint file to be evaluated. The structure of the generated experiment's logging directory, where the checkpoint is file is saved, should not be changed because the evaluation script will extract it's path and also load some other saved metadata inside it. The result of the evaluation is going to be saved in a new .txt file generated in the experiment's logging directory.
 
 Currently, multi-GPU training does not work. There is an issue in the metric syncing.
+
+For the proper evaluation of edge detecetion, which is reported in the CompositeTasking paper, the [seism repository](https://github.com/jponttuset/seism) needs to be used. In order to do so, edge predictions need to be saved as .png images with the same size as the input image and provided to the seism evaluation protocol along with the labels contained in the dataset. Best place to save the predictions as images in the code is to do it in the training_step() method of `/root/src/systems/system.py`. If having trouble with running the seism repository, take a look at [this repository](https://github.com/nikola3794/edge-evaluation-PASCAL-MT-tmp), which is a quick solution with instructions how to call the seism repository.
 
 # Example results
 The predictions of the CompositeTasking Network which has been trained using the semantic R2 Task Palette rule can be seen in the following image:

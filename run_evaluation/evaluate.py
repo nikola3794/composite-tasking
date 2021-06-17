@@ -55,7 +55,7 @@ def parse_args():
     # The first arg parser parses out only the --config argument, this argument is used to
     # load a yaml file containing key-values that override the defaults for the main parser below
     config_parser = parser = argparse.ArgumentParser(description='Training Config', add_help=False)
-    default_cfg_pth = '/home/nipopovic/Projects/composite_tasking/big_storage/code_shortcut/composite-tasking/run_evaluation/configs/debug_config.yaml'
+    default_cfg_pth = '/cluster/project/cvl/nipopovic/code/composite-tasking/run_evaluation/configs/debug_euler_1.yaml'
     parser.add_argument('--config_file_path', default=default_cfg_pth, type=str, metavar='FILE',
                         help='YAML config file specifying default arguments')
 

@@ -56,6 +56,7 @@ class CompositeTaskingExperimentConfig(ExperimentConfig):
         # Load the system from a checkpoint
         system = system.load_from_checkpoint(
             checkpoint_path,
+            cfg=self.cfg,
             task_z_code_dict = self.task_z_code_dict,
             task_to_id_dict = self.task_to_id_dict,
             colourmaps = self.colourmaps,

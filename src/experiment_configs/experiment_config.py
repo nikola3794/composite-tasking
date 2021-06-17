@@ -86,7 +86,8 @@ class ExperimentConfig:
         # Modify the pythons print function 
         # so it writes both on the console and to a log file in the dir
         rnd_str = ''.join(random.choice(string.ascii_letters) for i in range(8))
-        self.print_to_log_file_also(log_name=f"loaded_print_log_{rnd_str}")
+        new_log_name = f"print_log_resuming_{self.cfg['data_set_cfg']['palette_mode']}_{rnd_str}"
+        self.print_to_log_file_also(log_name=new_log_name)
 
         # Print the description of the new experiment
         self._print_loaded_experiment_description()
@@ -157,7 +158,7 @@ class ExperimentConfig:
         # Get the appropriate system
         system, _ = self._get_system_constructor()
         # Load the system from a checkpoint
-        return system.load_from_checkpoint(checkpoint_path)
+        return system.load_from_checkpoint(checkpoint_path, cfg=self.cfg)
 
     def train(self):
         # Trains the model in the train split 
@@ -452,7 +453,11 @@ class ExperimentConfig:
             assert category in self.loaded_cfg
             if cfg_overwrite[category] is not None:
                 for k in cfg_overwrite[category]:
-                    assert k in self.loaded_cfg[category]
+                    if not k in self.loaded_cfg[category]:
+                        warning_message = f"ExperimentConfigWarning: There is no key:{k} "
+                        warning_message += f"in the category: {category} of the saved "
+                        warning_message += f"experiments configuration. It will be used anyways.\n"
+                        print(warning_message)
                     self.cfg[category][k] = cfg_overwrite[category][k]
     
     def print_to_log_file_also(self, log_name=None):

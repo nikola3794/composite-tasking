@@ -1,0 +1,47 @@
+checkpoint_path: /cluster/work/cvl/nipopovic/experiments/composite_tasking/2021-06-16/8_expdybe/epoch=99-step=49999.ckpt
+data_root_dir: /scratch/175763407.tmpdir/PASCAL_MT
+
+# Setup config
+# ------------
+# Specify the training pipeline
+which_system: single_tasking 
+
+# Data set & task palette config
+# ------------------------------
+# Specify to which size to scale images during training
+# Specify as a list [H, W]
+img_size:
+  - 256
+  - 256
+# Specify which task palette mode to use
+palette_mode: single_task
+# Specify a list of tasks to be used
+task_list:
+  - seg
+
+# Training config    
+# ---------------
+# Specify batch size
+b_size: 20
+# Specify number of data loading workers
+n_workers: 10
+
+# Specify whether to use full precision (32) or half precision (16)
+pl_precision: 32
+
+# Specify how often to refresh progress bar (in steps)
+pl_progress_bar_refresh_rate: 100
+# Specify how often to add logging rows (does not write to disk) (in steps)
+pl_log_every_n_steps: 100
+# Specify how often to write logs to disk (in steps)
+pl_flush_logs_every_n_steps: 100
+# Specify whther to use torch lightning loggers like Tensorboard and wandb
+pl_logger_use: false
+
+# Turn on/off debug mode
+# In debug mode, only a few epochs are conducted on a small portion of the data
+# Also, there is no local experiment logging directory, nor wanb logging
+debug: false
+# Specify a message explaining the experiment details
+# This is to leave notes why experiments were started
+message: Evaluating...
